@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>退稅新制小幫手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* 退稅頁專用：步驟、記帳表單、清單 */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: step; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 34px 1fr; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.steps li::before { content: counter(step); width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--card); display: grid; place-items: center; font: 700 15px/1 var(--f-mono); }
+.steps h3 { margin: 0 0 2px; font-size: 16px; }
+.steps p { margin: 0; font-size: 14px; color: var(--muted); }
+.steps strong { color: var(--ink); }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; line-height: 1.25; }
+.tile .s { font-size: 12px; color: var(--muted); font-family: var(--f-mono); }
+.tile.good .v { color: var(--ok); }
+.tile.bad .v { color: var(--warn); }
+@media (max-width: 420px) { .tile .v { font-size: 18px; } }
+
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.form .full { grid-column: 1 / -1; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.field input, .field select { font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; }
+.field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field .hint { font-size: 12px; color: var(--muted); }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.preview { font-size: 14px; color: var(--muted); }
+.preview b { font-family: var(--f-mono); color: var(--ink); }
+
+.receipts { display: grid; gap: 10px; margin-top: 14px; }
+.receipt { border: 1px solid var(--line); border-left: 4px solid var(--ok); border-radius: 12px; padding: 12px; background: var(--card); display: grid; gap: 4px; }
+.receipt.warn { border-left-color: var(--warn); }
+.receipt.bad { border-left-color: var(--accent); }
+.receipt h4 { margin: 0; font-size: 15px; }
+.rline { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+.rline b { font-family: var(--f-mono); color: var(--ink); font-weight: 700; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill.bad { color: #fff; background: var(--accent); }
+.linkbtn { appearance: none; border: none; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--accent); cursor: pointer; font-weight: 500; }
+.empty { font-size: 14px; color: var(--muted); padding: 14px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
+
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.checklist li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.checklist .when { font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: block; margin-left: 26px; }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+
+.storegrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.traps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 15px; }
+.phrases { display: grid; gap: 8px; }
+.phrases .phrase { margin-top: 0; }
+textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="pagenav" aria-label="頁面">
+      <a href="index.html">行程</a>
+      <a href="map.html">地圖</a>
+      <a href="shops.html">飯店周邊購物</a>
+      <a href="taxfree.html" aria-current="page">退稅</a>
+    </nav>
+    <h1>退稅新制小幫手</h1>
+    <p class="lede">2026/11/1 起日本免稅改成「先付含稅價、出境再退」。這頁幫你記每張收據、算能退多少，12/2 在神戶機場照著清單走就好。</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section aria-labelledby="how-h">
+    <h2 class="sec-title" id="how-h">怎麼運作</h2>
+    <ol class="steps">
+      <li><div><h3>結帳：出示護照、付含稅價</h3><p>同一家店、同一天，<strong>未稅滿 ¥5,000</strong> 才能退稅。要在日本吃或用的東西，請店員<strong>分開結帳</strong>。</p></div></li>
+      <li><div><h3>登錄退款方式</h3><p>掃收據上的 QR Code，或照店員說明登錄信用卡、Alipay、WeChat Pay 或機場領現金。每家店用的退稅業者不同，<strong>結帳時就問清楚</strong>。</p></div></li>
+      <li><div><h3>12/2 神戶機場：託運前先給海關確認</h3><p>T2 一樓，<strong>報到託運之前</strong>帶著所有免稅品到海關端末刷護照。綠燈就完成；紅燈要把商品拿給海關看。</p></div></li>
+      <li><div><h3>收到退款</h3><p>刷卡或電子錢包之後才入帳；選現金的人，過出境審查後到退款機台刷護照領。</p></div></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="log-h">
+    <h2 class="sec-title" id="log-h">收據記帳・自動算能退多少</h2>
+
+    <div class="tiles" aria-live="polite">
+      <div class="tile good"><div class="k">預計可退</div><div class="v" id="t-refund">¥0</div><div class="s" id="t-twd">&nbsp;</div></div>
+      <div class="tile"><div class="k">收據</div><div class="v" id="t-count">0 張</div><div class="s" id="t-paid">含稅共 ¥0</div></div>
+      <div class="tile" id="t-issue-tile"><div class="k">要處理</div><div class="v" id="t-issues">0 張</div><div class="s">看下方黃色、紅色</div></div>
+    </div>
+
+    <div class="card">
+      <form id="form" class="form" novalidate>
+        <div class="field full">
+          <label for="f-store">店名</label>
+          <input id="f-store" list="store-list" autocomplete="off" placeholder="例：ドン・キホーテ 三宮店" required>
+          <datalist id="store-list"></datalist>
+        </div>
+        <div class="field">
+          <label for="f-date">購買日期</label>
+          <input id="f-date" type="date" min="2026-11-27" max="2026-12-02" required>
+        </div>
+        <div class="field">
+          <label for="f-method">退款方式</label>
+          <select id="f-method">
+            <option value="none">還沒登錄</option>
+            <option value="card">信用卡</option>
+            <option value="alipay">Alipay</option>
+            <option value="wechat">WeChat Pay</option>
+            <option value="cash">機場領現金</option>
+            <option value="bank">銀行轉帳</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-t10">一般商品・含稅金額（10%）</label>
+          <input id="f-t10" type="number" inputmode="numeric" min="0" step="1" placeholder="例：11000">
+          <span class="hint">藥妝、衣服、電器、雜貨</span>
+        </div>
+        <div class="field">
+          <label for="f-t8">食品飲料・含稅金額（8%）</label>
+          <input id="f-t8" type="number" inputmode="numeric" min="0" step="1" placeholder="例：5400">
+          <span class="hint">零食、餅乾（酒類算 10%）</span>
+        </div>
+        <div class="field full">
+          <label for="f-note">買了什麼（備註）</label>
+          <input id="f-note" autocomplete="off" placeholder="例：面膜 ×3、合利他命、白色戀人">
+        </div>
+        <label class="check full"><input type="checkbox" id="f-intact" checked><span>這張收據的東西都不拆、全部會帶出境</span></label>
+        <div class="form-actions full">
+          <button class="btn primary" type="submit">加入這張收據</button>
+          <span class="preview" id="f-preview">輸入金額會顯示未稅金額和可退多少</span>
+        </div>
+        <p class="fine full" id="f-error" role="alert"></p>
+      </form>
+    </div>
+
+    <div class="receipts" id="receipts"></div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="form">
+        <div class="field">
+          <label for="f-rate">匯率（1 日圓 = ? 台幣，選填）</label>
+          <input id="f-rate" type="number" inputmode="decimal" min="0" step="0.0001" placeholder="例：0.21">
+          <span class="hint">填了會顯示大約台幣</span>
+        </div>
+        <div class="field">
+          <span class="hint" id="save-state" style="align-self:end">記錄只存在這支手機的瀏覽器裡</span>
+        </div>
+      </div>
+      <div class="btns" style="margin-top:10px">
+        <button class="btn" type="button" id="btn-export">複製全部收據（備份）</button>
+        <button class="btn" type="button" id="btn-clear">清除全部</button>
+        <span class="copied" id="tool-msg" role="status"></span>
+      </div>
+      <textarea id="export" readonly hidden aria-label="收據文字備份"></textarea>
+    </div>
+  </section>
+
+  <section aria-labelledby="ap-h">
+    <h2 class="sec-title" id="ap-h">12/2 神戶機場清單・JX307 13:30 起飛</h2>
+    <ul class="checklist" id="checklist"></ul>
+    <p class="fine" style="margin-top:8px">神戶機場 T2 一樓有 2 台海關確認端末、2 台現金退款機台。Visit Japan Web 線上確認只開放成田、羽田、關西等大機場，神戶不能用，要刷機台。</p>
+  </section>
+
+  <section aria-labelledby="ph-h">
+    <h2 class="sec-title" id="ph-h">結帳時給店員看</h2>
+    <div class="phrases">
+      <div class="phrase"><p>我要退稅</p><p class="jp" lang="ja">免税でお願いします。</p></div>
+      <div class="phrase"><p>在日本要用的東西，收據分開</p><p class="jp" lang="ja">日本で使う物は、レシートを分けてください。</p></div>
+      <div class="phrase"><p>退款方式要怎麼登錄？</p><p class="jp" lang="ja">返金方法はどうやって登録しますか？</p></div>
+      <div class="phrase"><p>可以退到信用卡嗎？</p><p class="jp" lang="ja">クレジットカードに返金できますか？</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="st-h">
+    <h2 class="sec-title" id="st-h">各店退款方式</h2>
+    <div class="storegrid">
+      <article class="scard">
+        <h4>唐吉訶德（含 MEGA ドンキ）</h4>
+        <div class="rmeta">
+          <div><span class="k">業者</span>J&amp;J Tax Free「J-TaxRefund」</div>
+          <div><span class="k">登錄</span>掃收據 QR Code，購買日起 180 天內</div>
+          <div><span class="k">方式</span>信用卡、Alipay、WeChat Pay、機場現金</div>
+          <div><span class="k">手續費</span>申請免費；選機場領現金要另付業者手續費</div>
+        </div>
+      </article>
+      <article class="scard">
+        <h4>BicCamera</h4>
+        <div class="rmeta">
+          <div><span class="k">手續費</span>申請退款免費</div>
+          <div><span class="k">其他</span>登錄方式結帳時問店員</div>
+        </div>
+      </article>
+      <article class="scard">
+        <h4>UNIQLO、GU、無印良品、LoFt、神戸阪急</h4>
+        <div class="rmeta">
+          <div><span class="k">現況</span>還沒找到整理好的官方說明</div>
+          <div><span class="k">做法</span>結帳前先說「免税でお願いします」，問清楚登錄方式和手續費，收據拍照留底</div>
+        </div>
+      </article>
+      <article class="scard">
+        <h4>神戶機場領現金（Cash Japan）</h4>
+        <div class="rmeta">
+          <div><span class="k">位置</span>T2 一樓，過出境審查後</div>
+          <div><span class="k">適用</span>只限 Global Blue、J&amp;J Tax Free、JPrefund 這三家業者的店</div>
+          <div><span class="k">上限</span>機台一次最多退 ¥100,000</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="tr-h">
+    <h2 class="sec-title" id="tr-h">容易踩雷</h2>
+    <div class="card">
+      <ol class="traps">
+        <li>海關是<strong>一張收據一張收據</strong>確認的：同一張收據上只要少一樣東西，整張都不能退。要吃要用的請分開結帳。</li>
+        <li>密封袋取消了，但零食、化妝品<strong>還是不能在日本拆來用</strong>，用掉就不能退。已經吃掉或用掉的，不要刷機台，直接到海關櫃台說明。</li>
+        <li>確認時所有免稅品都要帶在身上：<strong>不能先託運</strong>，託運後也不能再拿出來。</li>
+        <li>最多退 10%（食品飲料 8%），有些店或業者會扣手續費，實拿可能比較少。</li>
+        <li>因為退稅手續錯過班機，航空公司和海關都不會補償，<strong>早點到機場</strong>。</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sources" aria-labelledby="src-h">
+    <h2 class="sec-title" id="src-h">資料來源（2026/11/17 查詢）</h2>
+    <ul>
+      <li><a href="https://www.mlit.go.jp/kankocho/tax-free/page01_000001_00021.html">觀光廳：リファンド方式とは</a></li>
+      <li><a href="https://www.kobeairport.jp/news/15245/">神戸空港：第2ターミナルに税関承認端末と現金還付端末</a>・<a href="https://www.aviationwire.jp/archives/352751">Aviation Wire：各 2 台設置</a></li>
+      <li><a href="https://ampmedia.jp/2026/10/19/kansai-airports">関西エアポート：チェックイン前に税関承認、現金は出国審査後</a></li>
+      <li><a href="https://www.cashjapan.com/ja/get-your-refund/">Cash Japan：空港での現金返金</a>・<a href="https://saitoshika-west.com/blog-entry-10537.html">機台上限 10 万円</a></li>
+      <li><a href="https://www.donki.com/service/tax_free/jp/tax_free.php">ドン・キホーテ：免税手続き</a>・<a href="https://honichi.com/news/2026/11/12/ppih-tax-refund/">J-TaxRefund 採用</a></li>
+      <li><a href="https://www.fun-japan.jp/tw/articles/14790">FUN! JAPAN：各店家手續與退款方式</a></li>
+      <li><a href="https://grenade.tw/blog/japan-tax-refund-new-system-tutorial/">退稅金額試算與手續費案例</a></li>
+    </ul>
+  </section>
+
+  <footer>規定和各店做法還在陸續公布，出發前一天再看一次官方說明。這頁的退稅金額是估算，實際以店家和業者為準。</footer>
+</main>
+
+<script src="common.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var KEY = "taxfree.v1";
+  var METHODS = { none: "還沒登錄", card: "信用卡", alipay: "Alipay", wechat: "WeChat Pay", cash: "機場領現金", bank: "銀行轉帳" };
+  var CHECKS = [
+    { id: "c1", when: "12/1 晚上", text: "所有免稅品集中放一袋，不拆封、不先放進要託運的行李" },
+    { id: "c2", when: "12/1 晚上", text: "每張收據都登錄好退款方式（上面清單沒有「還沒登錄」）" },
+    { id: "c3", when: "12/1 晚上", text: "收據和護照放在一起，收據拍照留底" },
+    { id: "c4", when: "12/2 10:30", text: "提早出門，11:00 前到神戶機場 T2" },
+    { id: "c5", when: "報到之前", text: "T2 一樓先到海關端末刷護照" },
+    { id: "c6", when: "看螢幕", text: "綠燈 → 完成，去報到託運；紅燈 → 帶著商品到海關檢查區給海關看" },
+    { id: "c7", when: "有吃掉的", text: "東西已經吃掉或用掉 → 不要刷機台，直接到海關櫃台說明" },
+    { id: "c8", when: "出境審查後", text: "選現金退款的，到現金退款機台刷護照領錢" },
+    { id: "c9", when: "回台灣後", text: "選信用卡或電子錢包的，留意之後的帳單有沒有入帳" }
+  ];
+
+  var state = load();
+
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && Array.isArray(s.items)) { s.checks = s.checks || {}; s.rate = s.rate || ""; return s; }
+    } catch (e) {}
+    return { rate: "", items: [], checks: {} };
+  }
+  function save() {
+    var el = document.getElementById("save-state");
+    try { localStorage.setItem(KEY, JSON.stringify(state)); el.textContent = "已自動存在這支手機的瀏覽器裡"; }
+    catch (e) { el.textContent = "這個瀏覽器不能存檔，關掉頁面記錄會消失，請用「複製全部收據」備份"; }
+  }
+
+  function yen(n) { return "¥" + Math.round(n).toLocaleString("ja-JP"); }
+  function num(v) { var n = parseFloat(v); return isFinite(n) && n > 0 ? n : 0; }
+  function calc(t10, t8) {
+    t10 = num(t10); t8 = num(t8);
+    return { ex: t10 / 1.1 + t8 / 1.08, tax: Math.floor(t10 / 11) + Math.floor(t8 * 8 / 108), paid: t10 + t8 };
+  }
+  function addDays(dateStr, n) {
+    var d = new Date(dateStr + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n);
+    return d.getUTCFullYear() + "/" + (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
+  }
+  function md(dateStr) { var p = dateStr.split("-"); return (+p[1]) + "/" + (+p[2]) + "（" + "日一二三四五六".charAt(new Date(dateStr + "T03:00:00Z").getUTCDay()) + "）"; }
+  function twd(n) {
+    var r = num(state.rate);
+    return r ? "約 NT$" + Math.round(n * r).toLocaleString("zh-TW") : "";
+  }
+
+  /* 同店同日的未稅合計，判斷有沒有滿 ¥5,000 */
+  function groupTotals() {
+    var g = {};
+    state.items.forEach(function (it) {
+      var k = it.store.trim().toLowerCase() + "|" + it.date;
+      g[k] = (g[k] || 0) + calc(it.t10, it.t8).ex;
+    });
+    return g;
+  }
+
+  function assess(it, groups) {
+    var c = calc(it.t10, it.t8);
+    var k = it.store.trim().toLowerCase() + "|" + it.date;
+    var issues = [];
+    var level = "ok";
+    if (!it.intact) { issues.push({ cls: "bad", txt: "會在日本用掉：這張不能退" }); level = "bad"; }
+    if (groups[k] < 5000) { issues.push({ cls: "bad", txt: "同店同日未稅 " + yen(groups[k]) + "，未滿 ¥5,000" }); level = "bad"; }
+    if (it.method === "none") { issues.push({ cls: "warn", txt: "還沒登錄退款方式" }); if (level === "ok") level = "warn"; }
+    if (!issues.length) issues.push({ cls: "ok", txt: "沒問題，12/2 帶去海關確認" });
+    return { c: c, issues: issues, level: level, eligible: it.intact && groups[k] >= 5000 };
+  }
+
+  function render() {
+    var groups = groupTotals();
+    var refund = 0, paid = 0, issueCount = 0;
+    var list = state.items.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : b.created - a.created; });
+    var html = list.map(function (it) {
+      var a = assess(it, groups);
+      paid += a.c.paid;
+      if (a.eligible) refund += a.c.tax;
+      if (a.level !== "ok") issueCount++;
+      return '<article class="receipt ' + (a.level === "ok" ? "" : a.level) + '">' +
+        '<h4 lang="ja">' + esc(it.store) + '</h4>' +
+        '<div class="rline"><span>' + md(it.date) + '</span><span>含稅 <b>' + yen(a.c.paid) + '</b></span><span>未稅 <b>' + yen(a.c.ex) + '</b></span><span>可退約 <b>' + yen(a.eligible ? a.c.tax : 0) + '</b></span></div>' +
+        '<div class="rline"><span>退款方式：' + METHODS[it.method] + '</span><span>出境期限 ' + addDays(it.date, 90) + '</span></div>' +
+        (it.note ? '<div class="rline"><span>' + esc(it.note) + '</span></div>' : "") +
+        '<div class="pills">' + a.issues.map(function (x) { return '<span class="pill ' + x.cls + '">' + x.txt + '</span>'; }).join("") + '</div>' +
+        '<div class="rline">' +
+          (it.method === "none" ? '<label class="check" style="font-size:13px"><span>改成：</span><select data-method="' + it.id + '" aria-label="退款方式">' +
+            Object.keys(METHODS).map(function (m) { return '<option value="' + m + '"' + (m === it.method ? " selected" : "") + '>' + METHODS[m] + '</option>'; }).join("") + '</select></label>' : "") +
+          '<button class="linkbtn" type="button" data-del="' + it.id + '">刪除</button>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+    document.getElementById("receipts").innerHTML = html || '<p class="empty">還沒有收據。每買一次免稅，就在上面加一筆。</p>';
+    document.getElementById("t-refund").textContent = yen(refund);
+    document.getElementById("t-twd").textContent = twd(refund) || " ";
+    document.getElementById("t-count").textContent = state.items.length + " 張";
+    document.getElementById("t-paid").textContent = "含稅共 " + yen(paid);
+    document.getElementById("t-issues").textContent = issueCount + " 張";
+    document.getElementById("t-issue-tile").className = "tile" + (issueCount ? " bad" : " good");
+  }
+
+  function renderChecks() {
+    document.getElementById("checklist").innerHTML = CHECKS.map(function (c) {
+      return '<li><label class="check"><input type="checkbox" data-check="' + c.id + '"' + (state.checks[c.id] ? " checked" : "") + '><span>' + c.text + '</span></label><span class="when">' + c.when + '</span></li>';
+    }).join("");
+  }
+
+  function preview() {
+    var c = calc(document.getElementById("f-t10").value, document.getElementById("f-t8").value);
+    var el = document.getElementById("f-preview");
+    if (!c.paid) { el.textContent = "輸入金額會顯示未稅金額和可退多少"; return; }
+    el.innerHTML = "未稅 <b>" + yen(c.ex) + "</b>・可退約 <b>" + yen(c.tax) + "</b>" + (c.ex < 5000 ? "（這張未滿 ¥5,000，要同店同日加起來夠才行）" : "");
+  }
+
+  function defaultDate() {
+    var d = zoned("Asia/Tokyo").date;
+    return d >= "2026-11-27" && d <= "2026-12-02" ? d : "2026-11-27";
+  }
+
+  function init() {
+    var names = {};
+    SHOPS.forEach(function (s) { names[s.name] = 1; });
+    ["ドン・キホーテ", "ユニクロ", "GU", "無印良品", "ロフト", "ビックカメラ", "マツモトキヨシ", "ココカラファイン", "スギ薬局", "神戸阪急", "大丸神戸店", "umie", "ポケモンセンター"].forEach(function (n) { names[n] = 1; });
+    document.getElementById("store-list").innerHTML = Object.keys(names).map(function (n) { return '<option value="' + esc(n) + '"></option>'; }).join("");
+    document.getElementById("f-date").value = defaultDate();
+    document.getElementById("f-rate").value = state.rate;
+
+    document.getElementById("f-t10").addEventListener("input", preview);
+    document.getElementById("f-t8").addEventListener("input", preview);
+
+    document.getElementById("form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var err = document.getElementById("f-error");
+      var store = document.getElementById("f-store").value.trim();
+      var date = document.getElementById("f-date").value;
+      var t10 = num(document.getElementById("f-t10").value), t8 = num(document.getElementById("f-t8").value);
+      if (!store) { err.textContent = "請填店名。"; document.getElementById("f-store").focus(); return; }
+      if (!date) { err.textContent = "請選購買日期。"; return; }
+      if (!t10 && !t8) { err.textContent = "請至少填一個含稅金額。"; document.getElementById("f-t10").focus(); return; }
+      err.textContent = "";
+      state.items.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: Date.now(),
+        store: store, date: date, t10: t10, t8: t8,
+        method: document.getElementById("f-method").value,
+        intact: document.getElementById("f-intact").checked,
+        note: document.getElementById("f-note").value.trim()
+      });
+      save(); render();
+      ["f-t10", "f-t8", "f-note"].forEach(function (id) { document.getElementById(id).value = ""; });
+      document.getElementById("f-intact").checked = true;
+      preview();
+      document.getElementById("tool-msg").textContent = "已加入 " + store;
+    });
+
+    var pendingDel = null;
+    document.getElementById("receipts").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-del]");
+      if (!b) return;
+      if (pendingDel !== b.dataset.del) { pendingDel = b.dataset.del; b.textContent = "再按一次確定刪除"; return; }
+      state.items = state.items.filter(function (it) { return it.id !== pendingDel; });
+      pendingDel = null; save(); render();
+    });
+    document.getElementById("receipts").addEventListener("change", function (e) {
+      var s = e.target.closest("select[data-method]");
+      if (!s) return;
+      state.items.forEach(function (it) { if (it.id === s.dataset.method) it.method = s.value; });
+      save(); render();
+    });
+
+    document.getElementById("f-rate").addEventListener("input", function (e) { state.rate = e.target.value; save(); render(); });
+
+    document.getElementById("checklist").addEventListener("change", function (e) {
+      var c = e.target.closest("input[data-check]");
+      if (!c) return;
+      state.checks[c.dataset.check] = c.checked; save();
+    });
+
+    document.getElementById("btn-export").addEventListener("click", function () {
+      var groups = groupTotals(), msg = document.getElementById("tool-msg"), box = document.getElementById("export");
+      var lines = ["神戶京阪行程・免稅收據（" + state.items.length + " 張）"];
+      state.items.forEach(function (it) {
+        var a = assess(it, groups);
+        lines.push(it.date + " " + it.store + "｜含稅 " + yen(a.c.paid) + "｜可退約 " + yen(a.eligible ? a.c.tax : 0) + "｜" + METHODS[it.method] + (it.note ? "｜" + it.note : ""));
+      });
+      lines.push("預計可退合計：" + document.getElementById("t-refund").textContent);
+      var text = lines.join("\n");
+      box.value = text; box.hidden = false;
+      try {
+        navigator.clipboard.writeText(text).then(function () { msg.textContent = "已複製，可以貼到備忘錄或 LINE"; }, function () { msg.textContent = "請在下方文字框長按全選複製"; });
+      } catch (err) { msg.textContent = "請在下方文字框長按全選複製"; }
+    });
+
+    var clearArmed = false;
+    document.getElementById("btn-clear").addEventListener("click", function (e) {
+      if (!clearArmed) { clearArmed = true; e.target.textContent = "再按一次清除全部收據"; return; }
+      state.items = []; clearArmed = false; e.target.textContent = "清除全部"; save(); render();
+      document.getElementById("tool-msg").textContent = "已清除";
+    });
+
+    renderChecks();
+    render();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
