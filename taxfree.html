@@ -75,6 +75,11 @@ label.btn { cursor: pointer; }
 .opcard h4, .mcard h4 { margin: 0; }
 .mcard.rec { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-soft); }
 .mcard ul { margin: 6px 0 0; padding-left: 1.2em; font-size: 14px; display: grid; gap: 3px; }
+.quick { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.quick a { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 1px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 14px; }
+.quick a small { font-weight: 400; font-size: 12px; color: var(--muted); }
+.quick a:hover { border-color: var(--accent); }
+.opcard .golink { margin-top: 8px; }
 .sub-intro { margin: 0 0 10px; font-size: 15px; }
 .traps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 15px; }
 .phrases { display: grid; gap: 8px; }
@@ -98,6 +103,12 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
 </header>
 
 <main class="wrap">
+
+  <section aria-labelledby="go-h">
+    <h2 class="sec-title" id="go-h">退稅網站捷徑</h2>
+    <ul class="quick" id="quick"></ul>
+    <p class="fine" style="margin-top:6px">收據上的 QR Code 會直接帶到對的業者；這裡是忘了掃、或要回頭查進度時用。</p>
+  </section>
 
   <section aria-labelledby="how-h">
     <h2 class="sec-title" id="how-h">怎麼運作</h2>
@@ -242,6 +253,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
           <div><span class="k">上限</span>機台一次最多 ¥100,000</div>
         </div>
         <p class="rnote">J-TaxRefund 要先在帳號裡把退款方式設成現金，機台才領得到。</p>
+        <p class="golink"><a class="btn small" href="https://www.cashjapan.com/ja/get-your-refund/" target="_blank" rel="noopener">Cash Japan 官網（各機場位置）↗</a></p>
       </article>
       <article class="scard">
         <h4>UNIQLO、GU、無印良品、LoFt、SunDrug、KoKuMiN</h4>
@@ -314,6 +326,8 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       <li><a href="https://grenade.tw/blog/japan-tax-refund-new-system-tutorial/">退稅金額試算與手續費案例</a></li>
       <li><a href="https://wellstsai.com/single-page-conclusion/japan-tax-refund-2026.html">日本退稅新制 6 個重點：各業者登錄期限、退款方式、手續費、店家對照</a></li>
       <li><a href="https://www.setn.com/ampnews/1913662">三立：林氏璧整理 4 大退稅系統</a>・<a href="https://blog.104.com.tw/?p=257043">104：各平台操作方式</a></li>
+      <li>業者網址：<a href="https://zenmenkyo.jp/refund-top/refund-method/">全國免稅店協會：主要退稅業者聯絡方式</a>・<a href="https://jptaxrefund.com/blog/japan-tax-refund-apps">各業者官方網站整理</a>・<a href="https://pievat.com/tourists/japan">PIE VAT 官網</a></li>
+      <li><a href="https://paymentnavi.com/?p=185432">Ocean：旅客負擔 1.55% 加處理費、西友 64 店採用</a>・<a href="https://www.nownews.com/news/6848028">台灣旅客退款爭議</a></li>
       <li><a href="https://www.stheadline.com/travel/3628833/">星島：Cash Japan 標準服務費 10%</a>・<a href="https://www.centrair.jp/en/service/1347407_2135.html">中部機場：Cash Japan 適用業者</a></li>
     </ul>
   </section>
@@ -504,8 +518,11 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       fees += a.fee;
       if (a.level !== "ok") issueCount++;
       var qrHtml = "";
-      if (isUrl(it.qr)) qrHtml = '<a class="qrlink" href="' + esc(it.qr) + '">打開退款登錄網站 ↗</a>';
-      else if (it.qr) qrHtml = '<span class="qr-msg">QR：' + esc(it.qr) + '</span>';
+      if (isUrl(it.qr)) qrHtml = '<a class="qrlink" href="' + esc(it.qr) + '" target="_blank" rel="noopener">打開退款登錄網站 ↗</a>';
+      else {
+        if (it.qr) qrHtml = '<span class="qr-msg">QR：' + esc(it.qr) + '</span>';
+        if (TAX_OPS[a.op]) qrHtml += (qrHtml ? " " : "") + '<a class="qrlink" href="' + esc(TAX_OPS[a.op].url) + '" target="_blank" rel="noopener">' + esc(TAX_OPS[a.op].go) + ' ↗</a>';
+      }
       return '<article class="receipt ' + (a.level === "ok" ? "" : a.level) + '">' +
         '<div class="rbody"><div>' +
           '<h4 lang="ja">' + esc(it.store) + '</h4>' +
@@ -556,8 +573,17 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
           '<div><span class="k">入帳</span>' + esc(o.speed) + '</div>' +
         '</div>' +
         (o.extra ? '<p class="rnote">' + esc(o.extra) + '</p>' : "") +
+        '<p class="golink"><a class="btn small" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.go) + ' ↗</a></p>' +
       '</article>';
     }).join(""));
+  }
+
+  function renderQuick() {
+    var items = Object.keys(TAX_OPS).map(function (k) { var o = TAX_OPS[k]; return { url: o.url, name: o.name, sub: o.how }; });
+    items.push({ url: CASH_JAPAN_URL, name: "Cash Japan", sub: "機場領現金" });
+    document.getElementById("quick").innerHTML = items.map(function (x) {
+      return '<li><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.name) + ' ↗<small>' + esc(x.sub) + '</small></a></li>';
+    }).join("");
   }
 
   function preview() {
@@ -719,6 +745,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       document.getElementById("tool-msg").textContent = "已清除";
     });
 
+    renderQuick();
     renderOps();
     render();
   }

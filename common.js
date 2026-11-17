@@ -331,35 +331,40 @@ function openState(open, mins) {
 /* kobeCash：神戶機場的 Cash Japan 機台能不能領（官網只列 Global Blue、J&J、JPrefund） */
 var TAX_OPS = {
   jtax:   { name: "J-TaxRefund", co: "J&J Tax Free（JTB × JCB）", kobeCash: true,
+            url: "https://j-taxrefund.com/", go: "前往 J-TaxRefund 登錄", how: "網站，不用 App；有中文",
             reg: "掃收據 QR Code 進網頁登錄，不用 App。購買隔天起 180 天內完成；在日本買過東西才能做護照驗證",
             to: "信用卡、簽帳卡、Alipay、WeChat Pay、銀行轉帳（¥100,000 以上，美元匯出）、機場現金（要先在帳號選現金）",
             stores: "唐吉訶德（官方）；BicCamera、Kojima、Sofmap、松本清、Cocokara、UNIQLO、GU（媒體或網友整理）",
             fee: "官方沒公布費率；唐吉訶德官方說免手續費；網友回報松本清 0.33%、GU 約 1%",
             speed: "幾週到約 2 個月" },
   jpref:  { name: "JPrefund", co: "Smart Technologies & Resources（SmartDetax）", kobeCash: true,
+            url: "https://jprefund.com/", go: "前往 JPrefund 登錄", how: "網站，不用 App（Google 搜不太到）",
             reg: "jprefund.com 網頁登錄：掃 QR Code、輸入 20 碼交易碼，或輸入日期加金額。購買日起 200 天內",
             to: "信用卡、Alipay+、WeChat Pay、銀行轉帳、機場現金",
             stores: "3COINS、JR 東日本、AEON Mall、BOOKOFF、PARCO、HANDS；LoFt（網友回報）",
             fee: "扣資料處理費和匯款費，各店自訂，登錄後看得到；網友回報 3COINS 約 ¥300",
             speed: "看店家，可能出境後超過 1 個月" },
   gb:     { name: "Global Blue", co: "Global Blue TFS Japan", kobeCash: true,
+            url: "https://www.globalblue.com/en/shoppers/how-to-shop-tax-free/guides/japan/japan-tax-free-shopping-2026", go: "Global Blue 日本退稅說明", how: "App「Global Blue – Shop Tax Free」",
             reg: "店家給的 email 或 QR Code，用 App 或網頁；退款方式可之後再補",
             to: "信用卡等非現金、市區或機場領現金",
             stores: "阪急・阪神百貨、Yodobashi、京王、西武・SOGO（官方）；高島屋（網友回報）",
             fee: "沒有統一費率，印在退稅單上；高島屋扣稅額的 23%（約未稅價 2.3%）",
             speed: "通常 3–5 天", extra: "Yodobashi 梅田、京都等 11 店可在市區先領現金" },
   pie:    { name: "PIE VAT", co: "Pie Systems Japan", kobeCash: false,
+            url: "https://pievat.com/tourists/japan", go: "PIE VAT 說明・下載 App", how: "App「PIE VAT」，要當天在店裡辦",
             reg: "一定要當天在店裡用 App（或網頁）掃 QR、輸入 6 碼完成，離開店就不能補",
             to: "信用卡、銀行、PayPal、WeChat Pay（依地區）",
             stores: "三井 Outlet Park、LaLaport、SHIBUYA109、東急 Plaza；Montbell（網友回報）",
             fee: "未稅價 1.5–3.0% 服務費，再加 0.28–0.32% 提領費",
             speed: "在 App 按提領後最多 15 個工作天" },
   ocean:  { name: "Ocean Tax Refund", co: "Ocean", kobeCash: false,
-            reg: "網頁、LINE 或微信",
+            url: "https://ocean.inc/service", go: "Ocean 官網", how: "掃收據 QR，用網頁或 LINE 小程式",
+            reg: "不用 App：網頁、LINE 小程式（台灣）或微信小程式",
             to: "依退款方式",
-            stores: "山田電機、Animate（官方）",
+            stores: "山田電機、Animate（官方）；西友、Trial（媒體）",
             fee: "購買金額 1.55%，再加依退款方式的處理費",
-            speed: "未公布" }
+            speed: "未公布", extra: "曾有台灣旅客反映退到台灣帳戶被跨國匯款費吃掉，Ocean 已公告道歉並說會改善" }
 };
 /* 依店名推測業者（網路整理，以收據為準） */
 var TAX_GUESS = [
@@ -371,11 +376,12 @@ var TAX_GUESS = [
   [/ハンズ|hands/i, "jpref"], [/ロフト|loft/i, "jpref"],
   [/阪急|阪神|ヨドバシ|yodobashi|京王|西武|そごう|sogo|高島屋/i, "gb"],
   [/モンベル|mont-?bell|三井アウトレット|ららぽーと|lalaport|shibuya ?109|渋谷109|東急プラザ/i, "pie"],
-  [/ヤマダ|labi|山田電機|アニメイト|animate/i, "ocean"]
+  [/ヤマダ|labi|山田電機|アニメイト|animate|西友|seiyu|トライアル/i, "ocean"]
 ];
 function guessTaxOp(name) {
   for (var i = 0; i < TAX_GUESS.length; i++) if (TAX_GUESS[i][0].test(name || "")) return TAX_GUESS[i][1];
   return "";
 }
 /* Cash Japan 標準服務費：退款額的 10%（估算，實際可能有每筆最低／最高、以 ¥50 為單位） */
+var CASH_JAPAN_URL = "https://www.cashjapan.com/ja/get-your-refund/";
 function cashFee(refund) { return Math.round(refund * 0.1); }
