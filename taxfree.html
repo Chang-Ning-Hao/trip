@@ -52,10 +52,23 @@
 .linkbtn { appearance: none; border: none; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--accent); cursor: pointer; font-weight: 500; }
 .empty { font-size: 14px; color: var(--muted); padding: 14px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
 
-.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.checklist li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-.checklist .when { font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: block; margin-left: 26px; }
-.checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+.field .btns { position: relative; }
+.sr-only { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.flabel { font-size: 13px; font-weight: 500; color: var(--muted); }
+label.btn { cursor: pointer; }
+.photo-box[hidden] { display: none; }
+.photo-box { display: grid; grid-template-columns: 88px 1fr; gap: 10px; align-items: start; margin-top: 6px; }
+.photo-box img, .rthumb { width: 88px; height: 88px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); }
+.qr-msg { margin: 0; font-size: 13px; color: var(--muted); word-break: break-all; }
+.qr-msg.ok { color: var(--ok); }
+.rbody { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.rthumb-btn { appearance: none; border: none; background: none; padding: 0; cursor: pointer; border-radius: 8px; }
+.rthumb { width: 64px; height: 64px; }
+.qrlink { font-size: 13px; font-weight: 700; text-decoration: none; }
+.viewer { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.85); display: grid; grid-template-rows: auto 1fr; gap: 10px; padding: 16px; }
+.viewer[hidden] { display: none; }
+.viewer img { max-width: 100%; max-height: 100%; object-fit: contain; justify-self: center; align-self: center; border-radius: 8px; }
+.viewer .btn { justify-self: end; }
 
 .storegrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
 .traps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 15px; }
@@ -75,7 +88,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       <a href="taxfree.html" aria-current="page">退稅</a>
     </nav>
     <h1>退稅新制小幫手</h1>
-    <p class="lede">2026/11/1 起日本免稅改成「先付含稅價、出境再退」。這頁幫你記每張收據、算能退多少，12/2 在神戶機場照著清單走就好。</p>
+    <p class="lede">2026/11/1 起日本免稅改成「先付含稅價、出境再退」。這頁幫你記每張收據、算能退多少；拍收據就能順便存下 QR Code 的退款登錄連結。</p>
   </div>
 </header>
 
@@ -102,6 +115,21 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
 
     <div class="card">
       <form id="form" class="form" novalidate>
+        <div class="field full">
+          <span class="flabel">收據照片・QR Code（選填）</span>
+          <div class="btns">
+            <label class="btn" for="f-cam">拍收據</label>
+            <input id="f-cam" class="sr-only" type="file" accept="image/*" capture="environment">
+            <label class="btn" for="f-lib">從相簿選</label>
+            <input id="f-lib" class="sr-only" type="file" accept="image/*">
+            <button class="linkbtn" type="button" id="f-photo-clear" hidden>移除照片</button>
+          </div>
+          <div class="photo-box" id="f-photo-box" hidden>
+            <img id="f-photo-img" alt="剛拍的收據">
+            <p class="qr-msg" id="f-qr-msg" role="status"></p>
+          </div>
+          <span class="hint">照片會跟這筆收據存在手機裡。拍到 QR Code 會自動讀出退款登錄連結，之後按一下就能去登錄。金額還是要自己填。</span>
+        </div>
         <div class="field full">
           <label for="f-store">店名</label>
           <input id="f-store" list="store-list" autocomplete="off" placeholder="例：ドン・キホーテ 三宮店" required>
@@ -146,6 +174,11 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     </div>
 
     <div class="receipts" id="receipts"></div>
+    <input id="r-photo" class="sr-only" type="file" accept="image/*" aria-label="補拍收據">
+    <div class="viewer" id="viewer" hidden>
+      <button class="btn" type="button" id="viewer-close">關閉</button>
+      <img id="viewer-img" alt="收據照片">
+    </div>
 
     <div class="card" style="margin-top:14px">
       <div class="form">
@@ -165,12 +198,6 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       </div>
       <textarea id="export" readonly hidden aria-label="收據文字備份"></textarea>
     </div>
-  </section>
-
-  <section aria-labelledby="ap-h">
-    <h2 class="sec-title" id="ap-h">12/2 神戶機場清單・JX307 13:30 起飛</h2>
-    <ul class="checklist" id="checklist"></ul>
-    <p class="fine" style="margin-top:8px">神戶機場 T2 一樓有 2 台海關確認端末、2 台現金退款機台。Visit Japan Web 線上確認只開放成田、羽田、關西等大機場，神戶不能用，要刷機台。</p>
   </section>
 
   <section aria-labelledby="ph-h">
@@ -255,27 +282,19 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
   "use strict";
 
   var KEY = "taxfree.v1";
+  var JSQR_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
   var METHODS = { none: "還沒登錄", card: "信用卡", alipay: "Alipay", wechat: "WeChat Pay", cash: "機場領現金", bank: "銀行轉帳" };
-  var CHECKS = [
-    { id: "c1", when: "12/1 晚上", text: "所有免稅品集中放一袋，不拆封、不先放進要託運的行李" },
-    { id: "c2", when: "12/1 晚上", text: "每張收據都登錄好退款方式（上面清單沒有「還沒登錄」）" },
-    { id: "c3", when: "12/1 晚上", text: "收據和護照放在一起，收據拍照留底" },
-    { id: "c4", when: "12/2 10:30", text: "提早出門，11:00 前到神戶機場 T2" },
-    { id: "c5", when: "報到之前", text: "T2 一樓先到海關端末刷護照" },
-    { id: "c6", when: "看螢幕", text: "綠燈 → 完成，去報到託運；紅燈 → 帶著商品到海關檢查區給海關看" },
-    { id: "c7", when: "有吃掉的", text: "東西已經吃掉或用掉 → 不要刷機台，直接到海關櫃台說明" },
-    { id: "c8", when: "出境審查後", text: "選現金退款的，到現金退款機台刷護照領錢" },
-    { id: "c9", when: "回台灣後", text: "選信用卡或電子錢包的，留意之後的帳單有沒有入帳" }
-  ];
 
   var state = load();
+  var pending = { photo: null, qr: "" };   /* 表單上剛拍的照片 */
+  var PHOTO_CACHE = {};
 
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY));
-      if (s && Array.isArray(s.items)) { s.checks = s.checks || {}; s.rate = s.rate || ""; return s; }
+      if (s && Array.isArray(s.items)) { s.rate = s.rate || ""; return s; }
     } catch (e) {}
-    return { rate: "", items: [], checks: {} };
+    return { rate: "", items: [] };
   }
   function save() {
     var el = document.getElementById("save-state");
@@ -283,6 +302,98 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     catch (e) { el.textContent = "這個瀏覽器不能存檔，關掉頁面記錄會消失，請用「複製全部收據」備份"; }
   }
 
+  /* ---------- 照片存在 IndexedDB（localStorage 放不下照片） ---------- */
+  var dbp = null;
+  function db() {
+    if (!dbp) dbp = new Promise(function (res, rej) {
+      if (!window.indexedDB) { rej(new Error("no idb")); return; }
+      var r = indexedDB.open("taxfree-photos", 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore("p"); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+    return dbp;
+  }
+  function idbDo(mode, fn) {
+    return db().then(function (d) {
+      return new Promise(function (res, rej) {
+        var tx = d.transaction("p", mode), st = tx.objectStore("p"), req = fn(st);
+        tx.oncomplete = function () { res(req && req.result); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function putPhoto(id, url) { PHOTO_CACHE[id] = url; return idbDo("readwrite", function (s) { return s.put(url, id); }).catch(function () { return false; }); }
+  function getPhoto(id) {
+    if (PHOTO_CACHE[id]) return Promise.resolve(PHOTO_CACHE[id]);
+    return idbDo("readonly", function (s) { return s.get(id); }).then(function (u) { if (u) PHOTO_CACHE[id] = u; return u; }).catch(function () { return null; });
+  }
+  function delPhoto(id) { delete PHOTO_CACHE[id]; return idbDo("readwrite", function (s) { return s.delete(id); }).catch(function () {}); }
+  function clearPhotos() { PHOTO_CACHE = {}; return idbDo("readwrite", function (s) { return s.clear(); }).catch(function () {}); }
+
+  /* ---------- 讀照片、壓縮、找 QR Code ---------- */
+  function loadImage(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("讀不到這張照片")); };
+      img.src = url;
+    });
+  }
+  function drawScaled(img, maxDim) {
+    var s = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+    var c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c;
+  }
+  function loadJsQR() {
+    if (window.jsQR) return Promise.resolve(window.jsQR);
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script");
+      s.src = JSQR_URL;
+      s.onload = function () { window.jsQR ? res(window.jsQR) : rej(new Error("jsQR")); };
+      s.onerror = function () { rej(new Error("jsQR")); };
+      document.head.appendChild(s);
+    });
+  }
+  function findQR(img) {
+    var viaDetector = Promise.reject();
+    if ("BarcodeDetector" in window) {
+      try {
+        viaDetector = new window.BarcodeDetector({ formats: ["qr_code"] }).detect(img).then(function (r) {
+          if (r && r.length && r[0].rawValue) return r[0].rawValue;
+          throw new Error("none");
+        });
+      } catch (e) { viaDetector = Promise.reject(e); }
+    }
+    return viaDetector.catch(function () {
+      return loadJsQR().then(function (jsQR) {
+        var sizes = [1600, 1000, 2400];
+        for (var i = 0; i < sizes.length; i++) {
+          var c = drawScaled(img, sizes[i]), ctx = c.getContext("2d");
+          var data = ctx.getImageData(0, 0, c.width, c.height);
+          var hit = jsQR(data.data, c.width, c.height, { inversionAttempts: "attemptBoth" });
+          if (hit && hit.data) return hit.data;
+        }
+        return "";
+      });
+    }).catch(function () { return ""; });
+  }
+  function processPhoto(file) {
+    return loadImage(file).then(function (img) {
+      var photo = drawScaled(img, 1200).toDataURL("image/jpeg", 0.72);
+      return findQR(img).then(function (qr) { URL.revokeObjectURL(img.src); return { photo: photo, qr: qr }; });
+    });
+  }
+  function isUrl(s) { return /^https?:\/\/\S+$/i.test(s || ""); }
+  function qrMsg(qr) {
+    if (!qr) return { cls: "", txt: "沒讀到 QR Code。照片已存；想存登錄連結的話，靠近一點只拍 QR Code 再試一次。" };
+    if (isUrl(qr)) return { cls: "ok", txt: "讀到 QR Code，退款登錄連結已存起來：" + qr };
+    return { cls: "ok", txt: "讀到 QR Code 內容：" + qr };
+  }
+
+  /* ---------- 計算 ---------- */
   function yen(n) { return "¥" + Math.round(n).toLocaleString("ja-JP"); }
   function num(v) { var n = parseFloat(v); return isFinite(n) && n > 0 ? n : 0; }
   function calc(t10, t8) {
@@ -294,12 +405,8 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     return d.getUTCFullYear() + "/" + (d.getUTCMonth() + 1) + "/" + d.getUTCDate();
   }
   function md(dateStr) { var p = dateStr.split("-"); return (+p[1]) + "/" + (+p[2]) + "（" + "日一二三四五六".charAt(new Date(dateStr + "T03:00:00Z").getUTCDay()) + "）"; }
-  function twd(n) {
-    var r = num(state.rate);
-    return r ? "約 NT$" + Math.round(n * r).toLocaleString("zh-TW") : "";
-  }
+  function twd(n) { var r = num(state.rate); return r ? "約 NT$" + Math.round(n * r).toLocaleString("zh-TW") : ""; }
 
-  /* 同店同日的未稅合計，判斷有沒有滿 ¥5,000 */
   function groupTotals() {
     var g = {};
     state.items.forEach(function (it) {
@@ -308,19 +415,21 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     });
     return g;
   }
-
   function assess(it, groups) {
     var c = calc(it.t10, it.t8);
     var k = it.store.trim().toLowerCase() + "|" + it.date;
-    var issues = [];
-    var level = "ok";
+    var issues = [], level = "ok";
     if (!it.intact) { issues.push({ cls: "bad", txt: "會在日本用掉：這張不能退" }); level = "bad"; }
     if (groups[k] < 5000) { issues.push({ cls: "bad", txt: "同店同日未稅 " + yen(groups[k]) + "，未滿 ¥5,000" }); level = "bad"; }
-    if (it.method === "none") { issues.push({ cls: "warn", txt: "還沒登錄退款方式" }); if (level === "ok") level = "warn"; }
+    if (it.method === "none") {
+      issues.push({ cls: "warn", txt: isUrl(it.qr) ? "還沒登錄退款方式：按上面的登錄連結" : "還沒登錄退款方式" });
+      if (level === "ok") level = "warn";
+    }
     if (!issues.length) issues.push({ cls: "ok", txt: "沒問題，12/2 帶去海關確認" });
     return { c: c, issues: issues, level: level, eligible: it.intact && groups[k] >= 5000 };
   }
 
+  /* ---------- 畫面 ---------- */
   function render() {
     var groups = groupTotals();
     var refund = 0, paid = 0, issueCount = 0;
@@ -330,20 +439,32 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       paid += a.c.paid;
       if (a.eligible) refund += a.c.tax;
       if (a.level !== "ok") issueCount++;
+      var qrHtml = "";
+      if (isUrl(it.qr)) qrHtml = '<a class="qrlink" href="' + esc(it.qr) + '">打開退款登錄網站 ↗</a>';
+      else if (it.qr) qrHtml = '<span class="qr-msg">QR：' + esc(it.qr) + '</span>';
       return '<article class="receipt ' + (a.level === "ok" ? "" : a.level) + '">' +
-        '<h4 lang="ja">' + esc(it.store) + '</h4>' +
-        '<div class="rline"><span>' + md(it.date) + '</span><span>含稅 <b>' + yen(a.c.paid) + '</b></span><span>未稅 <b>' + yen(a.c.ex) + '</b></span><span>可退約 <b>' + yen(a.eligible ? a.c.tax : 0) + '</b></span></div>' +
-        '<div class="rline"><span>退款方式：' + METHODS[it.method] + '</span><span>出境期限 ' + addDays(it.date, 90) + '</span></div>' +
-        (it.note ? '<div class="rline"><span>' + esc(it.note) + '</span></div>' : "") +
+        '<div class="rbody"><div>' +
+          '<h4 lang="ja">' + esc(it.store) + '</h4>' +
+          '<div class="rline"><span>' + md(it.date) + '</span><span>含稅 <b>' + yen(a.c.paid) + '</b></span><span>未稅 <b>' + yen(a.c.ex) + '</b></span><span>可退約 <b>' + yen(a.eligible ? a.c.tax : 0) + '</b></span></div>' +
+          '<div class="rline"><span>退款方式：' + METHODS[it.method] + '</span><span>出境期限 ' + addDays(it.date, 90) + '</span></div>' +
+          (it.note ? '<div class="rline"><span>' + esc(it.note) + '</span></div>' : "") +
+          (qrHtml ? '<div class="rline">' + qrHtml + '</div>' : "") +
+        '</div>' +
+        (it.photo ? '<button class="rthumb-btn" type="button" data-view="' + it.id + '" aria-label="放大看收據照片"><img class="rthumb" data-photo="' + it.id + '" alt="收據照片"></button>' : "") +
+        '</div>' +
         '<div class="pills">' + a.issues.map(function (x) { return '<span class="pill ' + x.cls + '">' + x.txt + '</span>'; }).join("") + '</div>' +
         '<div class="rline">' +
-          (it.method === "none" ? '<label class="check" style="font-size:13px"><span>改成：</span><select data-method="' + it.id + '" aria-label="退款方式">' +
+          (it.method === "none" ? '<label class="check" style="font-size:13px"><span>登錄好了：</span><select data-method="' + it.id + '" aria-label="退款方式">' +
             Object.keys(METHODS).map(function (m) { return '<option value="' + m + '"' + (m === it.method ? " selected" : "") + '>' + METHODS[m] + '</option>'; }).join("") + '</select></label>' : "") +
+          '<button class="linkbtn" type="button" data-addphoto="' + it.id + '">' + (it.photo ? "重拍收據" : "補拍收據") + '</button>' +
           '<button class="linkbtn" type="button" data-del="' + it.id + '">刪除</button>' +
         '</div>' +
       '</article>';
     }).join("");
     document.getElementById("receipts").innerHTML = html || '<p class="empty">還沒有收據。每買一次免稅，就在上面加一筆。</p>';
+    document.querySelectorAll("img[data-photo]").forEach(function (im) {
+      getPhoto(im.dataset.photo).then(function (u) { if (u) im.src = u; else im.alt = "照片不在這個瀏覽器裡"; });
+    });
     document.getElementById("t-refund").textContent = yen(refund);
     document.getElementById("t-twd").textContent = twd(refund) || " ";
     document.getElementById("t-count").textContent = state.items.length + " 張";
@@ -352,22 +473,36 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     document.getElementById("t-issue-tile").className = "tile" + (issueCount ? " bad" : " good");
   }
 
-  function renderChecks() {
-    document.getElementById("checklist").innerHTML = CHECKS.map(function (c) {
-      return '<li><label class="check"><input type="checkbox" data-check="' + c.id + '"' + (state.checks[c.id] ? " checked" : "") + '><span>' + c.text + '</span></label><span class="when">' + c.when + '</span></li>';
-    }).join("");
-  }
-
   function preview() {
     var c = calc(document.getElementById("f-t10").value, document.getElementById("f-t8").value);
     var el = document.getElementById("f-preview");
     if (!c.paid) { el.textContent = "輸入金額會顯示未稅金額和可退多少"; return; }
     el.innerHTML = "未稅 <b>" + yen(c.ex) + "</b>・可退約 <b>" + yen(c.tax) + "</b>" + (c.ex < 5000 ? "（這張未滿 ¥5,000，要同店同日加起來夠才行）" : "");
   }
-
+  function showPending() {
+    var box = document.getElementById("f-photo-box"), msg = document.getElementById("f-qr-msg");
+    document.getElementById("f-photo-clear").hidden = !pending.photo;
+    box.hidden = !pending.photo;
+    if (pending.photo) {
+      document.getElementById("f-photo-img").src = pending.photo;
+      var m = qrMsg(pending.qr); msg.className = "qr-msg " + m.cls; msg.textContent = m.txt;
+    }
+  }
   function defaultDate() {
     var d = zoned("Asia/Tokyo").date;
     return d >= "2026-11-27" && d <= "2026-12-02" ? d : "2026-11-27";
+  }
+
+  /* ---------- 事件 ---------- */
+  function onFormPhoto(e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    var msg = document.getElementById("f-qr-msg");
+    document.getElementById("f-photo-box").hidden = false;
+    msg.className = "qr-msg"; msg.textContent = "處理照片、找 QR Code 中…";
+    processPhoto(f).then(function (r) { pending = r; showPending(); })
+      .catch(function () { msg.textContent = "這張照片讀不到，請換一張再試。"; });
   }
 
   function init() {
@@ -380,6 +515,9 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
 
     document.getElementById("f-t10").addEventListener("input", preview);
     document.getElementById("f-t8").addEventListener("input", preview);
+    document.getElementById("f-cam").addEventListener("change", onFormPhoto);
+    document.getElementById("f-lib").addEventListener("change", onFormPhoto);
+    document.getElementById("f-photo-clear").addEventListener("click", function () { pending = { photo: null, qr: "" }; showPending(); });
 
     document.getElementById("form").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -389,30 +527,65 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       var t10 = num(document.getElementById("f-t10").value), t8 = num(document.getElementById("f-t8").value);
       if (!store) { err.textContent = "請填店名。"; document.getElementById("f-store").focus(); return; }
       if (!date) { err.textContent = "請選購買日期。"; return; }
-      if (!t10 && !t8) { err.textContent = "請至少填一個含稅金額。"; document.getElementById("f-t10").focus(); return; }
+      if (!t10 && !t8) { err.textContent = "請至少填一個含稅金額（收據上的合計）。"; document.getElementById("f-t10").focus(); return; }
       err.textContent = "";
-      state.items.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: Date.now(),
-        store: store, date: date, t10: t10, t8: t8,
+      var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      var item = {
+        id: id, created: Date.now(), store: store, date: date, t10: t10, t8: t8,
         method: document.getElementById("f-method").value,
         intact: document.getElementById("f-intact").checked,
-        note: document.getElementById("f-note").value.trim()
-      });
+        note: document.getElementById("f-note").value.trim(),
+        qr: pending.qr || "", photo: !!pending.photo
+      };
+      var photo = pending.photo;
+      state.items.push(item);
+      if (photo) putPhoto(id, photo);
       save(); render();
-      ["f-t10", "f-t8", "f-note"].forEach(function (id) { document.getElementById(id).value = ""; });
+      ["f-t10", "f-t8", "f-note"].forEach(function (x) { document.getElementById(x).value = ""; });
       document.getElementById("f-intact").checked = true;
-      preview();
+      pending = { photo: null, qr: "" }; showPending(); preview();
       document.getElementById("tool-msg").textContent = "已加入 " + store;
     });
 
-    var pendingDel = null;
+    var pendingDel = null, photoTarget = null;
     document.getElementById("receipts").addEventListener("click", function (e) {
-      var b = e.target.closest("button[data-del]");
-      if (!b) return;
-      if (pendingDel !== b.dataset.del) { pendingDel = b.dataset.del; b.textContent = "再按一次確定刪除"; return; }
-      state.items = state.items.filter(function (it) { return it.id !== pendingDel; });
-      pendingDel = null; save(); render();
+      var del = e.target.closest("button[data-del]");
+      if (del) {
+        if (pendingDel !== del.dataset.del) { pendingDel = del.dataset.del; del.textContent = "再按一次確定刪除"; return; }
+        var gone = pendingDel;
+        state.items = state.items.filter(function (it) { return it.id !== gone; });
+        delPhoto(gone); pendingDel = null; save(); render();
+        return;
+      }
+      var add = e.target.closest("button[data-addphoto]");
+      if (add) { photoTarget = add.dataset.addphoto; document.getElementById("r-photo").click(); return; }
+      var view = e.target.closest("button[data-view]");
+      if (view) {
+        getPhoto(view.dataset.view).then(function (u) {
+          if (!u) return;
+          document.getElementById("viewer-img").src = u;
+          document.getElementById("viewer").hidden = false;
+          document.getElementById("viewer-close").focus();
+        });
+      }
     });
+    document.getElementById("r-photo").addEventListener("change", function (e) {
+      var f = e.target.files && e.target.files[0], id = photoTarget;
+      e.target.value = "";
+      if (!f || !id) return;
+      var msg = document.getElementById("tool-msg");
+      msg.textContent = "處理照片、找 QR Code 中…";
+      processPhoto(f).then(function (r) {
+        state.items.forEach(function (it) { if (it.id === id) { it.photo = true; if (r.qr) it.qr = r.qr; } });
+        putPhoto(id, r.photo); save(); render();
+        msg.textContent = r.qr ? "照片已存，也讀到 QR Code" : "照片已存（沒讀到 QR Code）";
+      }).catch(function () { msg.textContent = "這張照片讀不到，請換一張再試。"; });
+    });
+    function closeViewer() { document.getElementById("viewer").hidden = true; }
+    document.getElementById("viewer-close").addEventListener("click", closeViewer);
+    document.getElementById("viewer").addEventListener("click", function (e) { if (e.target.id === "viewer") closeViewer(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeViewer(); });
+
     document.getElementById("receipts").addEventListener("change", function (e) {
       var s = e.target.closest("select[data-method]");
       if (!s) return;
@@ -422,18 +595,13 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
 
     document.getElementById("f-rate").addEventListener("input", function (e) { state.rate = e.target.value; save(); render(); });
 
-    document.getElementById("checklist").addEventListener("change", function (e) {
-      var c = e.target.closest("input[data-check]");
-      if (!c) return;
-      state.checks[c.dataset.check] = c.checked; save();
-    });
-
     document.getElementById("btn-export").addEventListener("click", function () {
       var groups = groupTotals(), msg = document.getElementById("tool-msg"), box = document.getElementById("export");
       var lines = ["神戶京阪行程・免稅收據（" + state.items.length + " 張）"];
       state.items.forEach(function (it) {
         var a = assess(it, groups);
-        lines.push(it.date + " " + it.store + "｜含稅 " + yen(a.c.paid) + "｜可退約 " + yen(a.eligible ? a.c.tax : 0) + "｜" + METHODS[it.method] + (it.note ? "｜" + it.note : ""));
+        lines.push(it.date + " " + it.store + "｜含稅 " + yen(a.c.paid) + "｜可退約 " + yen(a.eligible ? a.c.tax : 0) + "｜" + METHODS[it.method] +
+          (it.note ? "｜" + it.note : "") + (it.qr ? "｜登錄連結 " + it.qr : ""));
       });
       lines.push("預計可退合計：" + document.getElementById("t-refund").textContent);
       var text = lines.join("\n");
@@ -445,12 +613,11 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
 
     var clearArmed = false;
     document.getElementById("btn-clear").addEventListener("click", function (e) {
-      if (!clearArmed) { clearArmed = true; e.target.textContent = "再按一次清除全部收據"; return; }
-      state.items = []; clearArmed = false; e.target.textContent = "清除全部"; save(); render();
+      if (!clearArmed) { clearArmed = true; e.target.textContent = "再按一次清除全部收據和照片"; return; }
+      state.items = []; clearArmed = false; e.target.textContent = "清除全部"; clearPhotos(); save(); render();
       document.getElementById("tool-msg").textContent = "已清除";
     });
 
-    renderChecks();
     render();
   }
 
