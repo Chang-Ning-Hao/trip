@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
 :root {
   /* 版面：單欄 720px；最上面是航班看板，下方日期列固定，每天一條時間軸 */
@@ -175,6 +176,51 @@ section { margin: 0 0 28px; }
 .pill.live-soon { color: var(--warn); background: var(--warn-soft); }
 .pill.live-closed { color: var(--muted); background: var(--paper); border: 1px solid var(--line); }
 
+/* 地圖 */
+.mapchips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+.mapchips::-webkit-scrollbar { display: none; }
+button.chip { font: inherit; font-size: 14px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+.mapwrap { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+#map { height: 440px; background: var(--paper); }
+@media (max-width: 500px) { #map { height: 380px; } }
+.map-fallback { padding: 24px 16px; margin: 0; color: var(--muted); font-size: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 0; font-size: 13px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.mk-wrap { background: none; border: none; }
+.mk { display: grid; place-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.35); border: 2px solid #fff; }
+.mk-stop { width: 26px; height: 26px; border-radius: 50%; color: #fff; font: 700 13px/1 var(--f-mono); }
+.mk-food { width: 24px; height: 24px; border-radius: 7px; background: #fff; color: #c4382e; border-color: #c4382e; font: 700 12px/1 var(--f-body); }
+.mk-hotel { width: 28px; height: 28px; border-radius: 8px; background: #17212b; color: #fff; font: 700 13px/1 var(--f-body); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--card); color: var(--ink); }
+.leaflet-popup-content { margin: 12px 14px; font: 14px/1.55 var(--f-body); }
+.leaflet-popup-content b { font-size: 15px; }
+.leaflet-popup-content a { color: var(--accent); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.pop-meta { color: var(--muted); font-size: 13px; }
+
+/* 附近名店 */
+.food { border-top: 1px dashed var(--line); padding: 14px 0 12px; }
+.food-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.food-head h4 { margin: 0; font-size: 16px; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.food-sub { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+.rgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.rcard { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--paper); display: grid; gap: 4px; align-content: start; }
+.rtop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.rcard h5 { margin: 0; font-size: 15px; line-height: 1.4; }
+.rarea { font-size: 12px; color: var(--muted); }
+.rgenre { font-size: 13px; }
+.rmeta { display: grid; gap: 2px; font-size: 13px; }
+.rmeta .k { color: var(--muted); margin-right: 6px; }
+.rnote { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+.rlinks { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; margin-top: 4px; }
+.rlinks a { text-decoration: none; font-weight: 500; }
+.badge { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+.phrase { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-top: 12px; font-size: 14px; }
+.phrase p { margin: 0; }
+.phrase .jp { font-size: 17px; font-weight: 700; margin: 4px 0; }
+
 /* 資料來源 */
 .sources { font-size: 13px; color: var(--muted); }
 .sources ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 2px; }
@@ -241,6 +287,23 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
     </div>
   </section>
 
+  <section aria-labelledby="map-h" id="map-sec">
+    <h2 class="sec-title" id="map-h">地圖・行程與附近名店</h2>
+    <div class="mapchips" id="mapchips" role="group" aria-label="地圖要顯示哪一天"></div>
+    <div class="mapwrap"><div id="map" role="region" aria-label="行程地圖"></div></div>
+    <div class="legend">
+      <span><span class="mk mk-stop" style="background:#285f93;width:20px;height:20px;font-size:11px">1</span>當天行程順序</span>
+      <span><span class="mk mk-food" style="width:20px;height:20px;font-size:11px">食</span>附近食べログ名店</span>
+      <span><span class="mk mk-hotel" style="width:22px;height:22px;font-size:11px">宿</span>飯店</span>
+    </div>
+    <p class="fine" id="map-note" style="margin-top:6px">點標記可以看營業時間和 Google 地圖導航。</p>
+    <div class="phrase">
+      <p>不吃牛：給店員看這句</p>
+      <p class="jp" lang="ja">牛肉が食べられません。牛肉・牛のだしは入っていますか？</p>
+      <p class="fine">意思是「我不能吃牛肉，請問有用牛肉或牛骨高湯嗎？」清單裡已排除以牛肉為主的店；洋食的多蜜醬汁常用牛骨熬，所以洋食店沒有列。南京町的元祖ぎょうざ苑餃子餡有神戶牛，也沒有列入。</p>
+    </div>
+  </section>
+
   <nav class="daynav" aria-label="日期">
     <div class="chips" id="daynav"></div>
   </nav>
@@ -267,12 +330,28 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
       <li><a href="https://www.mina-perhonen.jp/en/store_information/kyoto">minä perhonen Kyoto 官方店舖資訊</a></li>
       <li><a href="https://www.city.kobe.lg.jp/a21651/kanko/bunka/bunkashisetsu/foreigner/sub2.html">神戸市：風見鶏の館</a></li>
       <li><a href="https://report.iko-yo.net/articles/35105">いこーよ：神戸クリスマスマーケット 2026（布引ハーブ園）</a></li>
+      <li><a href="https://gurunavi.com/ja/kdwv903/rev/rst">ぐるなび：かつ丼吉兵衛 三宮本店</a></li>
+      <li><a href="https://hitosara.com/0006031283/recommend.html">ヒトサラ：施家菜</a></li>
+      <li><a href="https://tabelog.com/hyogo/A2801/A280102/28001055/">食べログ：東光</a></li>
+      <li><a href="https://serai.jp/gourmet/1216390">サライ：南京町 老祥記</a>・<a href="https://pricey.jp/web/articles/3374">老祥記 臨時店舗</a></li>
+      <li><a href="https://www.gltjp.com/zh-hant/directory/item/16834/">GLTJP：元祖餃子苑（餡含神戶牛，未列入）</a></li>
+      <li><a href="https://hitosara.com/0020005849/food.html">ヒトサラ：炭焼あなご やま義</a>・<a href="https://tanosu.com/gourmet/196208/">TANOSU</a></li>
+      <li><a href="https://tanosu.com/gourmet/55029/">TANOSU：立ち喰い寿司 魚路</a></li>
+      <li><a href="https://www.mapple.net/original/441816/">まっぷる：たこ磯</a>・<a href="https://www.mapple.net/article/107705/">よこ井</a></li>
+      <li><a href="https://www.jalan.net/gourmet/grm_guide000000162925">じゃらん：甲賀流本店</a></li>
+      <li><a href="https://www.gltjp.com/ja/directory/item/12081/">GLTJP：お好み焼 美津の</a>・<a href="https://kinarino.jp/cat8/33899">キナリノ：美津の／おかる</a></li>
+      <li><a href="https://www.walkerplus.com/article/203344/">Walkerplus：とようけ茶屋</a></li>
+      <li><a href="https://retty.me/theme/101424900/">Retty：貴船ランチ</a>・<a href="https://tabelog.com/matome/16662/">食べログまとめ：貴船</a></li>
+      <li><a href="https://rurubu.jp/andmore/spot/80026535">るるぶ：京極かねよ</a></li>
+      <li><a href="https://kinarino.jp/cat8/42343">キナリノ：カフェ フロインドリーブ 本店</a></li>
+      <li>地圖：<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>・位置校正：國土地理院地址搜尋</li>
     </ul>
   </section>
 
   <footer>營業時間可能臨時變動，出發前一天再看一次官網最保險。資料更新：2026/11/16。</footer>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 (function () {
   "use strict";
@@ -403,6 +482,99 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
     }
   ];
 
+  /* ---------- 地圖座標（行程點） ---------- */
+  var STOP_LL = {
+    "d1-0": [34.6328, 135.2238], "d1-2": [34.6946, 135.1953], "d1-3": [34.6808, 135.1830], "d1-4": [34.6790, 135.1852],
+    "d2-0": [34.8394, 134.6939], "d2-1": [34.8267, 134.6904], "d2-2": [34.6278, 135.0343],
+    "d3-0": [34.8110, 135.5062], "d3-1": [34.6721, 135.4983], "d3-2": [34.6687, 135.5013], "d3-3": [34.6597, 135.5063],
+    "d4-0": [35.0394, 135.7292], "d4-1": [35.1219, 135.7628], "d4-3": [35.0029, 135.7690],
+    "d5-0": [34.7016, 135.1907], "d5-1": [34.7068, 135.1952], "d5-2": [34.6925, 135.1935],
+    "d6-1": [34.6936, 135.1961], "d6-2": [34.6328, 135.2238]
+  };
+  var STOP_ADDR = { "d4-3": "京都府京都市下京区市之町251-2" };
+  var HOTEL = { name: "相鐵 FRESA INN 神戶三宮", ll: [34.6967, 135.1990], addr: "兵庫県神戸市中央区旭通5丁目2-3" };
+
+  /* ---------- 附近食べログ名店（不吃牛、每人 ¥5,000 內） ---------- */
+  /* closed：公休的星期（0=日 … 6=六） */
+  var FOOD = [
+    { id: "kichibe", name: "かつ丼 吉兵衛 三宮本店", area: "三宮", genre: "豬排丼",
+      eat: "招牌玉子とじかつ丼（豬肉），另有蝦排丼", budget: "約 ¥1,000", hours: "10:30–19:30", closed: [], closedTxt: "不定休",
+      note: "センタープラザ西館 B1，只有吧台，翻桌很快。菜單也有牛排丼，點餐時避開。",
+      addr: "兵庫県神戸市中央区三宮町2丁目11", ll: [34.6921, 135.1913], days: ["d1", "d5"] },
+    { id: "shikasai", name: "施家菜", area: "三宮・北野坂下", genre: "廣東・香港料理",
+      eat: "午餐套餐（前菜四品＋主菜），港式海鮮炒麵", budget: "午餐約 ¥2,000（晚餐 ¥10,000 起，超出預算）",
+      hours: "午餐 11:45–14:30（週末 11:30 起）", closed: [2], closedTxt: "週二",
+      note: "只推薦午餐。部分菜色用神戶牛，點套餐時先講不吃牛。",
+      addr: "兵庫県神戸市中央区下山手通3-11-17", ll: [34.6941, 135.1867], days: ["d1", "d5"] },
+    { id: "toko", name: "東光", area: "元町", genre: "中華料理・餃子", badge: "食べログ 中国料理百名店 2023",
+      eat: "餃子、町中華定食", budget: "午餐 ¥1,000–1,999・晚餐店家標示 ¥3,000–3,999",
+      hours: "11:30–14:30、17:00–20:30", closed: [3], closedTxt: "週三",
+      note: "JR 元町站南口對面 2F。晚餐口碑實際花費偏高，想守住 ¥5,000 選午餐最穩。只收現金。",
+      addr: "兵庫県神戸市中央区元町通1-13-11", ll: [34.6894, 135.1869], days: ["d1", "d5"],
+      tabelog: "https://tabelog.com/hyogo/A2801/A280102/28001055/" },
+    { id: "roshoki", name: "南京町 老祥記", area: "元町・南京町", genre: "豬肉包（豚まん）",
+      eat: "豚まん一個 ¥120，三個起點", budget: "¥1,000 內", hours: "10:00–18:30（賣完為止）", closed: [1], closedTxt: "週一",
+      note: "南京町最長的排隊名物。本店改建中、先在臨時店面營業，預計 2026 年 11 月前後完工，去之前查一下現在在哪個店面。",
+      addr: "兵庫県神戸市中央区元町通2-1-14", ll: [34.6882, 135.1879], days: ["d1", "d5"] },
+
+    { id: "yamayoshi", name: "炭焼あなご やま義", area: "姬路站前", genre: "星鰻（穴子）料理",
+      eat: "あなごめし、蒸・燒・佃煮三吃定食", budget: "白燒單點 ¥1,600、便當 ¥2,500", hours: "11:00–20:00（L.O. 19:30）", closed: [], closedTxt: "無休",
+      note: "JR 姬路站北口、お溝筋商店街一進去。週末開店前就排隊，11:00 前到或下午 2 點後再來。",
+      addr: "兵庫県姫路市駅前町301", ll: [34.8283, 134.6899], days: ["d2"] },
+    { id: "totoro", name: "立ち喰い寿司 魚路", area: "姬路站高架下", genre: "立食壽司",
+      eat: "招牌一本穴子、特上握壽司套餐 ¥2,090", budget: "¥1,000–3,000", hours: "營業時間出發前確認", closed: [], closedTxt: "未查到", unverified: true,
+      note: "在 JR 姬路站直通的ビエラ姫路，一貫 ¥120 起，開店前 30 分～1 小時就開始排。",
+      addr: "兵庫県姫路市南駅前町127-1", ll: [34.8262, 134.6906], days: ["d2"] },
+    { id: "takoiso", name: "たこ磯", area: "明石・魚の棚（舞子往西 2 站）", genre: "明石燒（玉子燒）",
+      eat: "玉子燒 15 個 ¥800、穴子入り ¥950", budget: "¥1,000 內", hours: "10:00–19:00", closed: [], closedTxt: "無休",
+      note: "魚の棚商店街裡。JR 舞子到明石約 5 分，去大橋前後順路。",
+      addr: "兵庫県明石市本町1丁目1-11", ll: [34.6474, 134.9937], days: ["d2"] },
+    { id: "yokoi", name: "よこ井", area: "明石・魚の棚", genre: "明石燒（玉子燒）",
+      eat: "明石燒 10 個 ¥500，沾冰涼昆布高湯的老吃法", budget: "¥1,000 內", hours: "10:00–17:00", closed: [4], closedTxt: "週四",
+      note: "17:00 就關，要排在看大橋之前。",
+      addr: "兵庫県明石市本町1丁目1-13", ll: [34.6476, 134.9941], days: ["d2"] },
+
+    { id: "kogaryu", name: "大阪アメリカ村 甲賀流 本店", area: "美國村・三角公園前", genre: "章魚燒", badge: "米其林指南介紹過",
+      eat: "ソースマヨ 10 個約 ¥600，買了在對面三角公園吃", budget: "¥1,000 內", hours: "11:00–20:00", closed: [], closedTxt: "1/1–1/2 休",
+      addr: "大阪府大阪市中央区西心斎橋2-18-4", ll: [34.6719, 135.4985], days: ["d3"] },
+    { id: "mizuno", name: "お好み焼 美津の", area: "道頓堀", genre: "大阪燒", badge: "米其林必比登推介",
+      eat: "山芋燒（山芋 100% 麵糊，豬肉＋海鮮）、豚玉", budget: "¥2,000–2,999", hours: "11:00–22:00（L.O. 21:00）", closed: [4], closedTxt: "週四（部分資料寫無休）",
+      note: "有牛筋（すじ）口味要避開；「美津の焼」加了特製絞肉，不確定是什麼肉，保險點山芋燒或豚玉。常大排隊。",
+      addr: "大阪府大阪市中央区道頓堀1-4-15", ll: [34.6688, 135.5029], days: ["d3"] },
+    { id: "okaru", name: "おかる", area: "千日前（電電街旁）", genre: "大阪燒",
+      eat: "豬肉大阪燒，老闆娘會用美乃滋在上面畫圖", budget: "晚餐 ¥2,000–2,999・午餐 ¥1,000–1,999",
+      hours: "12:00–15:00、17:00–22:00", closed: [4], closedTxt: "週四、第 3 個週三",
+      note: "逛完電電街走過去約 10 分，晚餐剛好。",
+      addr: "大阪府大阪市中央区千日前1-9-19", ll: [34.6662, 135.5047], days: ["d3"] },
+
+    { id: "toyouke", name: "とようけ茶屋", area: "北野天滿宮前（金閣寺南邊約 2 km）", genre: "豆腐・湯葉",
+      eat: "生ゆば丼、とようけ丼、奴膳 ¥1,540", budget: "¥1,000–2,000", hours: "11:00–15:00", closed: [4], closedTxt: "週四，另每月 2 次不定休",
+      note: "開店就排隊。金閣寺看完搭公車或計程車約 10 分過來吃午餐；15:00 就收。",
+      addr: "京都府京都市上京区紙屋川町822", ll: [35.0285, 135.7348], days: ["d4"] },
+    { id: "toriijaya", name: "鳥居茶屋", area: "貴船", genre: "和食定食",
+      eat: "松花堂、定食", budget: "約 ¥2,000", hours: "營業時間出發前確認（冬天可能較早收）", closed: [], closedTxt: "未查到", unverified: true,
+      note: "貴船多半是川床懷石（¥8,000 起，超出預算），這家是少數平價的。",
+      ll: [35.1214, 135.7631], days: ["d4"] },
+    { id: "kibuneclub", name: "貴船倶楽部", area: "貴船", genre: "咖啡・輕食",
+      eat: "京都湯葉飯、抹茶聖代、紅豆湯", budget: "¥2,000 內", hours: "營業時間出發前確認", closed: [], closedTxt: "未查到", unverified: true,
+      note: "參拜完休息喝杯熱的。",
+      ll: [35.1196, 135.7638], days: ["d4"] },
+    { id: "kaneyo", name: "京極かねよ", area: "河原町（minä perhonen 走路約 10 分）", genre: "鰻魚",
+      eat: "名物きんし丼：鰻魚飯上蓋一整片京風玉子燒", budget: "¥3,000–3,999", hours: "11:30–15:30、17:00–20:30", closed: [3], closedTxt: "週三、週二晚上",
+      note: "逛完 minä perhonen 吃晚餐，吃完從京都河原町搭阪急回神戶。",
+      addr: "京都府京都市中京区松ヶ枝町456", ll: [35.0069, 135.7682], days: ["d4"] },
+
+    { id: "freundlieb", name: "カフェ フロインドリーブ 本店", area: "新神戶（北野與布引之間）", genre: "麵包・咖啡（教堂改建）",
+      eat: "三明治、德國麵包、聖誕史多倫", budget: "¥1,000–3,000", hours: "10:00–18:00（咖啡 L.O. 17:30）", closed: [3], closedTxt: "週三",
+      note: "老教堂改建，2F 是咖啡廳。招牌之一是烤牛肉三明治，請點別的口味。11 月起有賣聖誕史多倫。",
+      addr: "兵庫県神戸市中央区生田町4-6-15", ll: [34.7027, 135.1958], days: ["d5"] }
+  ];
+  var FOOD_NOTE = {
+    d2: "晚餐回三宮的話，可以參考 11/27 那天列的三宮・元町名店。",
+    d5: "北野和新神戶在三宮北邊，三宮・元町的店也走得到。"
+  };
+  var DAY_COLORS = ["#c4382e", "#c26a00", "#2b7549", "#285f93", "#7a4bb0", "#4d5a68"];
+
   /* ---------- 工具 ---------- */
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function mapUrl(q) { return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
@@ -470,6 +642,158 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
     });
   }
 
+  /* ---------- 附近名店 ---------- */
+  var WD = ["日", "一", "二", "三", "四", "五", "六"];
+  function weekdayOf(dateStr) { return new Date(dateStr + "T03:00:00Z").getUTCDay(); } /* 03:00Z = 日本中午 */
+  function tabelogUrl(r) { return r.tabelog || "https://www.google.com/search?q=" + encodeURIComponent(r.name + " 食べログ"); }
+  function foodMapUrl(r) { return mapUrl(r.name + " " + (r.addr || r.area)); }
+  function foodPill(r, dateStr) {
+    var wd = weekdayOf(dateStr);
+    if (r.closed.indexOf(wd) >= 0) return '<span class="pill warn">這天週' + WD[wd] + '公休</span>';
+    if (r.unverified) return '<span class="pill info">時間待確認</span>';
+    return '<span class="pill ok">週' + WD[wd] + '有營業</span>';
+  }
+  function foodHtml(d, id) {
+    var list = FOOD.filter(function (r) { return r.days.indexOf(id) >= 0; });
+    if (!list.length) return "";
+    return '<div class="food">' +
+      '<div class="food-head"><h4>附近的食べログ名店</h4><button class="btn small" type="button" data-mapday="' + id + '">在地圖上看這天</button></div>' +
+      '<p class="food-sub">已排除以牛肉為主的店，每人預算都在 ¥5,000 內。' + (FOOD_NOTE[id] || "") + '</p>' +
+      '<div class="rgrid">' + list.map(function (r) {
+        return '<article class="rcard">' +
+          '<div class="rtop"><h5 lang="ja">' + esc(r.name) + '</h5>' + foodPill(r, d.date) + '</div>' +
+          '<div class="rarea">' + esc(r.area) + '</div>' +
+          '<div class="rgenre"><strong>' + esc(r.genre) + '</strong>' + (r.badge ? ' <span class="badge">' + esc(r.badge) + '</span>' : "") + '</div>' +
+          '<div class="rmeta">' +
+            '<div><span class="k">吃什麼</span>' + esc(r.eat) + '</div>' +
+            '<div><span class="k">預算</span>' + esc(r.budget) + '</div>' +
+            '<div><span class="k">營業</span>' + esc(r.hours) + '</div>' +
+            '<div><span class="k">公休</span>' + esc(r.closedTxt) + '</div>' +
+          '</div>' +
+          (r.note ? '<p class="rnote">' + esc(r.note) + '</p>' : "") +
+          '<div class="rlinks"><a href="' + foodMapUrl(r) + '">Google 地圖 ↗</a><a href="' + tabelogUrl(r) + '">食べログ ↗</a></div>' +
+        '</article>';
+      }).join("") + '</div></div>';
+  }
+
+  /* ---------- 地圖 ---------- */
+  var MAP = null;
+  function haversineKm(a, b) {
+    var R = 6371, toR = Math.PI / 180, dLat = (b[0] - a[0]) * toR, dLng = (b[1] - a[1]) * toR;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a[0] * toR) * Math.cos(b[0] * toR) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function cacheGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function cacheSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  /* 用國土地理院地址搜尋把位置校正到門牌附近；查不到或差太遠就維持原本座標 */
+  function refineAll(jobs) {
+    var i = 0;
+    function next() {
+      if (i >= jobs.length) return;
+      var job = jobs[i++], key = "geo1:" + job.addr, hit = cacheGet(key);
+      if (hit) { job.marker.setLatLng(hit); next(); return; }
+      fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(job.addr))
+        .then(function (r) { return r.json(); })
+        .then(function (arr) {
+          if (arr && arr.length && arr[0].geometry) {
+            var c = arr[0].geometry.coordinates, ll = [c[1], c[0]];
+            if (haversineKm(ll, job.approx) < 1.5) { job.marker.setLatLng(ll); cacheSet(key, ll); }
+          }
+        })
+        .catch(function () {})
+        .then(function () { setTimeout(next, 150); });
+    }
+    next();
+  }
+
+  function initMap() {
+    var el = document.getElementById("map");
+    if (!window.L) {
+      el.innerHTML = '<p class="map-fallback">地圖元件沒有載入（網路不穩或在 Claude 預覽裡開啟時會這樣）。請重新整理，或直接用每一站的「Google 地圖」連結。</p>';
+      return;
+    }
+    var map = L.map(el, { scrollWheelZoom: false, zoomControl: true });
+    var tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    var tileErr = 0;
+    tiles.on("tileerror", function () {
+      if (++tileErr === 4) document.getElementById("map-note").textContent = "底圖載入不了（在 Claude 預覽裡會這樣），請用 GitHub 網址開啟。標記還是可以點。";
+    });
+    var layer = L.featureGroup().addTo(map), items = [], jobs = [];
+
+    function icon(cls, text, color) {
+      return L.divIcon({ className: "mk-wrap", iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14],
+        html: '<div class="mk ' + cls + '"' + (color ? ' style="background:' + color + '"' : "") + '>' + text + '</div>' });
+    }
+
+    DAYS.forEach(function (d, i) {
+      var id = "d" + (i + 1);
+      d.stops.forEach(function (s, j) {
+        var ll = STOP_LL[id + "-" + j];
+        if (!ll) return;
+        var m = L.marker(ll, { icon: icon("mk-stop", String(j + 1), DAY_COLORS[i]), title: s.name, zIndexOffset: 200 })
+          .bindPopup('<b>' + esc(s.name) + '</b><br><span class="pop-meta">' + d.md + ' ' + d.wd + ' · 第 ' + (j + 1) + ' 站</span><br>' + esc(s.hoursTxt) +
+            (s.q ? '<br><a href="' + mapUrl(s.q) + '">Google 地圖導航 ↗</a>' : ""));
+        items.push({ marker: m, days: [id] });
+        if (STOP_ADDR[id + "-" + j]) jobs.push({ marker: m, addr: STOP_ADDR[id + "-" + j], approx: ll });
+      });
+    });
+
+    var hm = L.marker(HOTEL.ll, { icon: icon("mk-hotel", "宿"), title: HOTEL.name, zIndexOffset: 300 })
+      .bindPopup('<b>' + HOTEL.name + '</b><br><span class="pop-meta">入住 15:00・退房 11:00</span><br><a href="' + mapUrl(HOTEL_Q) + '">Google 地圖導航 ↗</a>');
+    items.push({ marker: hm, days: ["d1", "d2", "d3", "d4", "d5", "d6"] });
+    jobs.push({ marker: hm, addr: HOTEL.addr, approx: HOTEL.ll });
+
+    FOOD.forEach(function (r) {
+      var m = L.marker(r.ll, { icon: icon("mk-food", "食"), title: r.name, zIndexOffset: 100 })
+        .bindPopup('<b lang="ja">' + esc(r.name) + '</b><br><span class="pop-meta">' + esc(r.genre) + ' · ' + esc(r.budget) + '</span><br>' +
+          '營業 ' + esc(r.hours) + '<br>公休 ' + esc(r.closedTxt) +
+          '<br><a href="' + foodMapUrl(r) + '">Google 地圖 ↗</a>　<a href="' + tabelogUrl(r) + '">食べログ ↗</a>');
+      items.push({ marker: m, days: r.days });
+      if (r.addr) jobs.push({ marker: m, addr: r.addr, approx: r.ll });
+    });
+
+    MAP = { map: map, layer: layer, items: items };
+    showMapDay(defaultMapDay());
+    refineAll(jobs);
+  }
+
+  function defaultMapDay() {
+    var jp = zoned("Asia/Tokyo"), key = "all";
+    DAYS.forEach(function (d, i) { if (d.date === jp.date) key = "d" + (i + 1); });
+    return key;
+  }
+
+  function showMapDay(key) {
+    document.querySelectorAll("#mapchips .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.key === key)); });
+    if (!MAP) return;
+    MAP.layer.clearLayers();
+    MAP.items.forEach(function (it) { if (key === "all" || it.days.indexOf(key) >= 0) MAP.layer.addLayer(it.marker); });
+    var b = MAP.layer.getBounds();
+    if (b.isValid()) MAP.map.fitBounds(b, { padding: [28, 28], maxZoom: 15 });
+  }
+
+  function renderMapChips() {
+    var html = '<button type="button" class="chip" data-key="all" aria-pressed="false">全部</button>' +
+      DAYS.map(function (d, i) {
+        return '<button type="button" class="chip" data-key="d' + (i + 1) + '" aria-pressed="false"><b>' + d.md + '</b> ' + d.wd.replace("週", "") + '</button>';
+      }).join("");
+    var box = document.getElementById("mapchips");
+    box.innerHTML = html;
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-key]");
+      if (b) showMapDay(b.dataset.key);
+    });
+    document.getElementById("days").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-mapday]");
+      if (!b) return;
+      showMapDay(b.dataset.mapday);
+      document.getElementById("map-sec").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   /* ---------- 繪製行程 ---------- */
   function renderDays() {
     var nav = "", out = "";
@@ -492,7 +816,7 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
               (s.note ? '<p class="note">' + s.note + '</p>' : "") +
               (s.q ? '<a class="maplink" href="' + mapUrl(s.q) + '">Google 地圖 ↗</a>' : "") +
             '</div></li>';
-        }).join("") + '</ol></section>';
+        }).join("") + '</ol>' + foodHtml(d, id) + '</section>';
     });
     document.getElementById("daynav").innerHTML = nav;
     document.getElementById("days").innerHTML = out;
@@ -550,6 +874,8 @@ footer { padding: 8px 0 40px; font-size: 12px; color: var(--muted); }
 
   renderFlights();
   renderDays();
+  renderMapChips();
+  initMap();
   updateFlights();
   updateLive();
   setInterval(function () { updateFlights(); updateLive(); }, 30000);
