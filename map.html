@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>神戶京阪行程地圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="pagenav" aria-label="頁面">
+      <a href="index.html">行程</a>
+      <a href="map.html" aria-current="page">地圖</a>
+      <a href="shops.html">飯店周邊購物</a>
+    </nav>
+    <h1>行程地圖</h1>
+    <p class="lede">每天的景點、附近的食べログ名店和飯店周邊的購物點。點標記可以看營業時間和導航。</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section aria-label="地圖" id="map-sec">
+    <div class="mapchips" id="mapchips" role="group" aria-label="地圖要顯示哪些地點"></div>
+    <div class="mapwrap"><div id="map" role="region" aria-label="行程地圖"></div></div>
+    <div class="legend">
+      <span><span class="mk mk-stop" style="background:#285f93;width:20px;height:20px;font-size:11px">1</span>當天行程順序</span>
+      <span><span class="mk mk-food" style="width:20px;height:20px;font-size:11px">食</span>食べログ名店</span>
+      <span><span class="mk mk-shop" style="background:#2b7549;width:20px;height:20px;font-size:10px">超</span>購物（超市、藥妝、唐吉訶德、無印、LoFt、GU、UNIQLO）</span>
+      <span><span class="mk mk-hotel" style="width:22px;height:22px;font-size:11px">宿</span>飯店</span>
+    </div>
+    <p class="fine" id="map-note" style="margin-top:6px">位置會用國土地理院的地址資料自動校正；要走路過去時，請按標記裡的 Google 地圖導航。</p>
+  </section>
+
+  <footer>地圖：<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a> 貢獻者・位置校正：國土地理院地址搜尋。資料更新：2026/11/17。</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var MAP = null;
+  var KEYS = ["all", "shops"].concat(DAYS.map(function (d, i) { return "d" + (i + 1); }));
+
+  function cacheGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function cacheSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  /* 用國土地理院地址搜尋把位置校正到門牌附近；查不到或差超過 1.5 km 就維持原本座標 */
+  function refineAll(jobs) {
+    var i = 0;
+    function next() {
+      if (i >= jobs.length) return;
+      var job = jobs[i++], key = "geo1:" + job.addr, hit = cacheGet(key);
+      if (hit) { job.marker.setLatLng(hit); next(); return; }
+      fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(job.addr))
+        .then(function (r) { return r.json(); })
+        .then(function (arr) {
+          if (arr && arr.length && arr[0].geometry) {
+            var c = arr[0].geometry.coordinates, ll = [c[1], c[0]];
+            if (distKm(ll, job.approx) < 1.5) { job.marker.setLatLng(ll); cacheSet(key, ll); }
+          }
+        })
+        .catch(function () {})
+        .then(function () { setTimeout(next, 150); });
+    }
+    next();
+  }
+
+  function icon(cls, text, color) {
+    return L.divIcon({ className: "mk-wrap", iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14],
+      html: '<div class="mk ' + cls + '"' + (color ? ' style="background:' + color + '"' : "") + '>' + text + '</div>' });
+  }
+
+  function initMap() {
+    var el = document.getElementById("map");
+    if (!window.L) {
+      el.innerHTML = '<p class="map-fallback">地圖元件沒有載入（網路不穩或在 Claude 預覽裡開啟時會這樣）。請重新整理，或回到行程頁用每一站的「Google 地圖」連結。</p>';
+      return;
+    }
+    var map = L.map(el, { scrollWheelZoom: false });
+    var tiles = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    var tileErr = 0;
+    tiles.on("tileerror", function () {
+      if (++tileErr === 4) document.getElementById("map-note").textContent = "底圖載入不了（在 Claude 預覽裡會這樣），請用 GitHub 網址開啟。標記還是可以點。";
+    });
+    var layer = L.featureGroup().addTo(map), items = [], jobs = [];
+
+    /* 行程點 */
+    DAYS.forEach(function (d, i) {
+      var id = "d" + (i + 1);
+      d.stops.forEach(function (s, j) {
+        var ll = STOP_LL[id + "-" + j];
+        if (!ll) return;
+        var m = L.marker(ll, { icon: icon("mk-stop", String(j + 1), DAY_COLORS[i]), title: s.name, zIndexOffset: 200 })
+          .bindPopup('<b>' + esc(s.name) + '</b><br><span class="pop-meta">' + d.md + ' ' + d.wd + ' · 第 ' + (j + 1) + ' 站</span><br>' + esc(s.hoursTxt) +
+            (s.q ? '<br><a href="' + mapUrl(s.q) + '">Google 地圖導航 ↗</a>' : ""));
+        items.push({ marker: m, keys: [id] });
+        if (STOP_ADDR[id + "-" + j]) jobs.push({ marker: m, addr: STOP_ADDR[id + "-" + j], approx: ll });
+      });
+    });
+
+    /* 飯店 */
+    var hm = L.marker(HOTEL.ll, { icon: icon("mk-hotel", "宿"), title: HOTEL.name, zIndexOffset: 300 })
+      .bindPopup('<b>' + HOTEL.name + '</b><br><span class="pop-meta">入住 15:00・退房 11:00</span><br><a href="' + mapUrl(HOTEL_Q) + '">Google 地圖導航 ↗</a>');
+    items.push({ marker: hm, keys: ["d1", "d2", "d3", "d4", "d5", "d6", "shops"] });
+    jobs.push({ marker: hm, addr: HOTEL.addr, approx: HOTEL.ll });
+
+    /* 食べログ名店 */
+    FOOD.forEach(function (r) {
+      var m = L.marker(r.ll, { icon: icon("mk-food", "食"), title: r.name, zIndexOffset: 100 })
+        .bindPopup('<b lang="ja">' + esc(r.name) + '</b><br><span class="pop-meta">' + esc(r.genre) + ' · ' + esc(r.budget) + '</span><br>' +
+          '營業 ' + esc(r.hours) + '<br>公休 ' + esc(r.closedTxt) +
+          '<br><a href="' + foodMapUrl(r) + '">Google 地圖 ↗</a>　<a href="' + tabelogUrl(r) + '">食べログ ↗</a>');
+      items.push({ marker: m, keys: r.days });
+      if (r.addr) jobs.push({ marker: m, addr: r.addr, approx: r.ll });
+    });
+
+    /* 購物 */
+    SHOPS.forEach(function (s) {
+      if (!s.ll) return;
+      var c = SHOP_CATS[s.cat];
+      var m = L.marker(s.ll, { icon: icon("mk-shop", c.mk, c.color), title: s.name, zIndexOffset: 50 })
+        .bindPopup('<b lang="ja">' + esc(s.name) + '</b><br><span class="pop-meta">' + c.label + ' · ' + esc(s.where) + '</span><br>' +
+          '營業 ' + esc(s.hours) + '<br><a href="' + mapUrl(s.name) + '">Google 地圖導航 ↗</a>');
+      items.push({ marker: m, keys: ["shops"] });
+      if (s.addr) jobs.push({ marker: m, addr: s.addr, approx: s.ll });
+    });
+
+    MAP = { map: map, layer: layer, items: items };
+    show(startKey());
+    refineAll(jobs);
+  }
+
+  function startKey() {
+    var h = location.hash.replace("#", "");
+    if (KEYS.indexOf(h) >= 0) return h;
+    var jp = zoned("Asia/Tokyo"), key = "all";
+    DAYS.forEach(function (d, i) { if (d.date === jp.date) key = "d" + (i + 1); });
+    return key;
+  }
+
+  function show(key) {
+    document.querySelectorAll("#mapchips .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.key === key)); });
+    if (!MAP) return;
+    MAP.layer.clearLayers();
+    MAP.items.forEach(function (it) {
+      var inAll = key === "all" && it.keys.join() !== "shops";
+      if (inAll || it.keys.indexOf(key) >= 0) MAP.layer.addLayer(it.marker);
+    });
+    var b = MAP.layer.getBounds();
+    if (b.isValid()) MAP.map.fitBounds(b, { padding: [28, 28], maxZoom: key === "shops" ? 17 : 15 });
+  }
+
+  function renderChips() {
+    var box = document.getElementById("mapchips");
+    box.innerHTML = '<button type="button" class="chip" data-key="all" aria-pressed="false">全部行程</button>' +
+      DAYS.map(function (d, i) {
+        return '<button type="button" class="chip" data-key="d' + (i + 1) + '" aria-pressed="false"><b>' + d.md + '</b> ' + d.wd.replace("週", "") + '</button>';
+      }).join("") +
+      '<button type="button" class="chip" data-key="shops" aria-pressed="false">飯店周邊購物</button>';
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-key]");
+      if (!b) return;
+      show(b.dataset.key);
+      try { history.replaceState(null, "", "#" + b.dataset.key); } catch (err) {}
+    });
+    window.addEventListener("hashchange", function () { show(startKey()); });
+  }
+
+  renderChips();
+  initMap();
+})();
+</script>
+</body>
+</html>

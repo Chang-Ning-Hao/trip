@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>飯店周邊購物</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="pagenav" aria-label="頁面">
+      <a href="index.html">行程</a>
+      <a href="map.html">地圖</a>
+      <a href="shops.html" aria-current="page">飯店周邊購物</a>
+    </nav>
+    <h1>飯店周邊購物</h1>
+    <p class="lede">從相鐵 FRESA INN 神戶三宮（旭通 5-2-3）走得到的超市、藥妝、唐吉訶德、無印良品、LoFt、GU 和 UNIQLO。</p>
+    <div class="clocks" aria-live="polite"><span>日本現在<b id="clk-jp">--:--</b></span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="taxfree" aria-labelledby="tax-h">
+    <h2 id="tax-h">免稅規定 11 月起改了</h2>
+    <ul>
+      <li>2026/11/1 起改成「先付含稅價、出境再退稅」：在免稅店結帳時先付含消費稅的價格，出境時在機場的免稅手續機台出示護照、經海關確認東西帶出境後，才把消費稅退給你。</li>
+      <li>要在購買日起 90 天內出境時辦理。12/2 從神戶機場出境時，記得預留時間給這個手續。</li>
+      <li>零食、化妝品這類消耗品如果在日本就用掉或吃掉，出境時沒辦法退稅；以前那種密封的免稅袋取消了。</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="list-h" style="margin-top:24px">
+    <h2 class="sec-title" id="list-h">店家清單・依離飯店遠近排序</h2>
+    <div class="shopcats" id="shopcats" role="group" aria-label="篩選店家類型"></div>
+    <div id="shoplist"></div>
+    <p class="fine">距離是從飯店算的大約直線距離，步行時間抓 1.3 倍繞路。營業狀態依日本時間每 30 秒更新。<a href="map.html#shops">在地圖上看全部 →</a></p>
+  </section>
+
+  <section class="sources" aria-labelledby="src-h">
+    <h2 class="sec-title" id="src-h">資料來源（2026/11/17 查詢）</h2>
+    <ul>
+      <li><a href="https://www.mlit.go.jp/kankocho/tax-free/page01_000001_00021.html">觀光廳：リファンド方式とは</a></li>
+      <li><a href="https://mint-kobe.jp/en/?p=573">ミント神戸：KOHYO 三宮店</a>・<a href="https://tokubai.co.jp/transit/rail_lines/station_groups/2711/opening_hour/overnight_opening">トクバイ：三宮 超市營業時間</a></li>
+      <li><a href="https://ekitan.com/media/epi/elleseine/elleseine-shop037/">ダイエー神戸三宮店 地址</a>・<a href="https://kyodonewsprwire.jp/release/201701268250">三宮オーパ2</a></li>
+      <li><a href="https://tokubai.co.jp/prefectures/28/loconavi_spots/155835">トクバイ：阪急オアシス 神戸旭通店、サンドラッグ</a></li>
+      <li><a href="https://livejapan.com/en/in-japan/spot-lj0063702">LIVE JAPAN：ドン・キホーテ三宮店</a>・<a href="https://digitalpr.jp/r/72056">ドン・キホーテ三宮オーパ センター街店</a></li>
+      <li><a href="https://www.muji.com/jp/ja/shop/detail/046684">無印良品 神戸阪急</a>・<a href="https://www.muji.com/jp/ja/shop/detail/062308">MUJIcom さんちか</a>・<a href="https://tokubai.co.jp/transit/rail_lines/station_groups/2711/interior_shop">神戸BAL、神戸ロフト</a></li>
+      <li><a href="https://www.loft.co.jp/newsrelease/ef4eba3d8fe08bfa0c6887d045c5ef4a34a8ad82.pdf">ロフト：神戸ロフト 神戸阪急新館 4F</a></li>
+      <li><a href="https://www.watch.impress.co.jp/docs/news/1576263.html">ユニクロ 神戸三宮店</a>・<a href="https://map.yahoo.co.jp/v3/place/7Q7MCBrfoRw">Yahoo! 地圖：GU 三宮オーパ店</a></li>
+    </ul>
+  </section>
+
+  <footer>營業時間可能臨時變動，出發前一天再看一次官網最保險。</footer>
+</main>
+
+<script src="common.js"></script>
+<script>
+(function () {
+  "use strict";
+  var current = "all";
+  var ORDER = ["super", "drug", "donki", "muji", "loft", "gu", "uniqlo"];
+
+  function walkTxt(s) {
+    if (!s.ll) return "距離請看 Google 地圖";
+    var m = distKm(HOTEL.ll, s.ll) * 1000;
+    var mins = Math.max(1, Math.round(m * 1.3 / 80));
+    return "約 " + (Math.round(m / 50) * 50 || 50) + " m・步行約 " + mins + " 分";
+  }
+
+  function renderCats() {
+    var box = document.getElementById("shopcats");
+    box.innerHTML = '<button type="button" class="chip" data-cat="all" aria-pressed="true">全部</button>' +
+      ORDER.map(function (k) { return '<button type="button" class="chip" data-cat="' + k + '" aria-pressed="false">' + SHOP_CATS[k].label + '</button>'; }).join("");
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-cat]");
+      if (!b) return;
+      current = b.dataset.cat;
+      box.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      render();
+    });
+  }
+
+  function render() {
+    var jp = zoned("Asia/Tokyo");
+    document.getElementById("clk-jp").textContent = jp.hh + ":" + jp.mm;
+    var html = ORDER.filter(function (k) { return current === "all" || current === k; }).map(function (k) {
+      var c = SHOP_CATS[k];
+      var list = SHOPS.filter(function (s) { return s.cat === k; }).sort(function (a, b) {
+        var da = a.ll ? distKm(HOTEL.ll, a.ll) : 99, db = b.ll ? distKm(HOTEL.ll, b.ll) : 99;
+        return da - db;
+      });
+      return '<div class="shop-group"><h3><span class="cat-dot" style="background:' + c.color + '">' + c.mk + '</span>' + c.label + '</h3><div class="rgrid">' +
+        list.map(function (s) {
+          var st = openState(s.open, jp.mins);
+          return '<article class="scard">' +
+            '<div class="rtop"><h4 lang="ja">' + esc(s.name) + '</h4>' + (st ? '<span class="pill ' + st.cls + '">' + st.txt + '</span>' : '<span class="pill info">時間待確認</span>') + '</div>' +
+            '<div class="sdist">' + walkTxt(s) + '</div>' +
+            '<div class="rmeta">' +
+              '<div><span class="k">位置</span>' + esc(s.where) + '</div>' +
+              '<div><span class="k">營業</span>' + esc(s.hours) + '</div>' +
+            '</div>' +
+            (s.tip ? '<p class="rnote">' + esc(s.tip) + '</p>' : "") +
+            '<div class="rlinks"><a href="' + mapUrl(s.name) + '">Google 地圖導航 ↗</a>' + (s.ll ? '<a href="map.html#shops">在地圖上看</a>' : "") + '</div>' +
+          '</article>';
+        }).join("") + '</div></div>';
+    }).join("");
+    document.getElementById("shoplist").innerHTML = html;
+  }
+
+  renderCats();
+  render();
+  setInterval(render, 30000);
+})();
+</script>
+</body>
+</html>
