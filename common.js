@@ -47,7 +47,7 @@
         { icon: "food", name: "三宮午餐", hoursTxt: "三宮站周邊", q: "三宮 ランチ" },
         { icon: "bag", name: "Kojima × Sofmap 神戶 Harborland 店", ja: "コジマ×ソフマップ 神戸ハーバーランド店",
           hours: ["10:00", "20:00"], hoursTxt: "約 10:00–20:00", pill: ["info", "時間依 umie 商場"],
-          note: "在 <strong>umie NORTH MALL 6F</strong>，逛完直接接著逛 umie。店家沒有另外公布時間，先用 umie 商場時間標示。JR 三ノ宮站到神戶站約 5 分，步行約 5 分。",
+          note: "在 <strong>umie NORTH MALL 6F</strong>，逛完直接接著逛 umie。退稅網友回報是 J-TaxRefund，手續費以收據為準。店家沒有另外公布時間，先用 umie 商場時間標示。JR 三ノ宮站到神戶站約 5 分，步行約 5 分。",
           q: "コジマ×ソフマップ 神戸ハーバーランド店" },
         { icon: "bag", name: "umie／MOSAIC", ja: "神戸ハーバーランドumie・モザイク", hours: ["10:00", "20:00"],
           hoursTxt: "商店 10:00–20:00・MOSAIC 餐廳 11:00–22:00", pill: ["ok", "當天有營業"],
@@ -290,13 +290,13 @@ var SHOPS = [
     tip: "大型超市，零食、餅乾伴手禮、飲料一次買齊。", addr: "兵庫県神戸市中央区雲井通6-1-15", ll: [34.6936, 135.1983] },
   { id: "oasis", cat: "super", name: "阪急オアシス 神戸旭通店", where: "旭通（和飯店同一區），地下鐵三宮站改札旁有入口", hours: "10:00–22:00（地下鐵側熟食麵包區平日 8:00 開）", open: ["10:00", "22:00"],
     tip: "走精緻路線的超市，熟食和麵包好買。", ll: null },
-  { id: "kokumin", cat: "drug", name: "KoKuMiN JR三宮駅東口店", where: "JR 三ノ宮站東口", hours: "8:00–22:00", open: ["08:00", "22:00"],
+  { id: "kokumin",  cat: "drug", name: "KoKuMiN JR三宮駅東口店", where: "JR 三ノ宮站東口", hours: "8:00–22:00", open: ["08:00", "22:00"],
     tip: "藥妝、日用品，出站就到。", ll: [34.6948, 135.1966] },
-  { id: "sundrug", cat: "drug", name: "サンドラッグ 三宮旭通店", where: "旭通（和飯店同一區）", hours: "9:00–22:00", open: ["09:00", "22:00"],
+  { id: "sundrug",  cat: "drug", name: "サンドラッグ 三宮旭通店", where: "旭通（和飯店同一區）", hours: "9:00–22:00", open: ["09:00", "22:00"],
     tip: "藥妝、日用品。", ll: null },
-  { id: "donki", cat: "donki", name: "ドン・キホーテ 三宮店", where: "下山手通，JR 三ノ宮站步行約 5 分", hours: "24 小時", open: "24h",
+  { id: "donki", tax: "J-TaxRefund・官方公告申請免手續費（機場領現金另收）",  cat: "donki", name: "ドン・キホーテ 三宮店", where: "下山手通，JR 三ノ宮站步行約 5 分", hours: "24 小時", open: "24h",
     tip: "藥妝、零食、伴手禮最齊，24 小時營業，最後一晚補貨首選。", addr: "兵庫県神戸市中央区下山手通2-12-3", ll: [34.6957, 135.1913] },
-  { id: "donki-opa", cat: "donki", name: "ドン・キホーテ 三宮オーパ センター街店", where: "三宮 OPA B1（三宮センター街）", hours: "10:00–21:00", open: ["10:00", "21:00"],
+  { id: "donki-opa", tax: "J-TaxRefund・官方公告申請免手續費（機場領現金另收）",  cat: "donki", name: "ドン・キホーテ 三宮オーパ センター街店", where: "三宮 OPA B1（三宮センター街）", hours: "10:00–21:00", open: ["10:00", "21:00"],
     tip: "主打美妝保養、彩妝、隱形眼鏡，適合專門買美妝。", addr: "兵庫県神戸市中央区三宮町1-5-26", ll: [34.6919, 135.1928] },
   { id: "muji-hankyu", cat: "muji", name: "無印良品 神戸阪急", where: "神戸阪急 新館 5F・6F", hours: "10:00–20:00", open: ["10:00", "20:00"],
     tip: "LoFt 就在同一棟 4F，一次逛完。", addr: "兵庫県神戸市中央区小野柄通8-1-8", ll: [34.6929, 135.1966] },
@@ -304,11 +304,11 @@ var SHOPS = [
     tip: "小型店，食品和旅行小物為主。每月第 3 個週三公休，12 月無休。", addr: "兵庫県神戸市中央区三宮町1-10-1", ll: [34.6930, 135.1945] },
   { id: "muji-bal", cat: "muji", name: "無印良品 神戸BAL", where: "神戸BAL，三宮站往元町方向約 500 m", hours: "11:00–20:00", open: ["11:00", "20:00"],
     tip: "2024 年改裝重開的大店。", ll: null },
-  { id: "loft", cat: "loft", name: "神戸ロフト", where: "神戸阪急 新館 4F", hours: "10:00–20:00", open: ["10:00", "20:00"],
+  { id: "loft", tax: "網友回報用 JPrefund，結帳時再確認", cat: "loft", name: "神戸ロフト", where: "神戸阪急 新館 4F", hours: "10:00–20:00", open: ["10:00", "20:00"],
     tip: "文具、美妝雜貨、季節小物；樓上 5F・6F 就是無印良品。", ll: [34.6932, 135.1970] },
-  { id: "gu", cat: "gu", name: "GU 三宮オーパ店", where: "三宮 OPA，阪神神戸三宮站 A6 出口步行約 1 分", hours: "依三宮 OPA（約 11:00–21:00，各店不同）", open: null,
+  { id: "gu", tax: "J-TaxRefund（非官方整理）・網友回報手續費約 1%",  cat: "gu", name: "GU 三宮オーパ店", where: "三宮 OPA，阪神神戸三宮站 A6 出口步行約 1 分", hours: "依三宮 OPA（約 11:00–21:00，各店不同）", open: null,
     tip: "營業時間沒查到店家自己的公告，出發前看一下 GU 官網。", ll: [34.6921, 135.1925] },
-  { id: "uniqlo", cat: "uniqlo", name: "ユニクロ 神戸三宮店", where: "三宮センター街東口 Style Plaza 1–5F", hours: "營業時間出發前查官網", open: null,
+  { id: "uniqlo", tax: "J-TaxRefund（非官方整理），結帳時再確認", cat: "uniqlo", name: "ユニクロ 神戸三宮店", where: "三宮センター街東口 Style Plaza 1–5F", hours: "營業時間出發前查官網", open: null,
     tip: "兵庫縣最大的 UNIQLO，有 UTme! 客製 T 恤和神戶聯名商品。", addr: "兵庫県神戸市中央区三宮町1-7-5", ll: [34.6926, 135.1938] }
 ];
 
@@ -326,3 +326,56 @@ function openState(open, mins) {
   if (mins < c) return { cls: "live-open", txt: "營業中 · 到 " + open[1] };
   return { cls: "live-closed", txt: "已打烊 · 明天 " + open[0] + " 開" };
 }
+
+/* ---------- 退稅業者（2026/11 新制） ---------- */
+/* kobeCash：神戶機場的 Cash Japan 機台能不能領（官網只列 Global Blue、J&J、JPrefund） */
+var TAX_OPS = {
+  jtax:   { name: "J-TaxRefund", co: "J&J Tax Free（JTB × JCB）", kobeCash: true,
+            reg: "掃收據 QR Code 進網頁登錄，不用 App。購買隔天起 180 天內完成；在日本買過東西才能做護照驗證",
+            to: "信用卡、簽帳卡、Alipay、WeChat Pay、銀行轉帳（¥100,000 以上，美元匯出）、機場現金（要先在帳號選現金）",
+            stores: "唐吉訶德（官方）；BicCamera、Kojima、Sofmap、松本清、Cocokara、UNIQLO、GU（媒體或網友整理）",
+            fee: "官方沒公布費率；唐吉訶德官方說免手續費；網友回報松本清 0.33%、GU 約 1%",
+            speed: "幾週到約 2 個月" },
+  jpref:  { name: "JPrefund", co: "Smart Technologies & Resources（SmartDetax）", kobeCash: true,
+            reg: "jprefund.com 網頁登錄：掃 QR Code、輸入 20 碼交易碼，或輸入日期加金額。購買日起 200 天內",
+            to: "信用卡、Alipay+、WeChat Pay、銀行轉帳、機場現金",
+            stores: "3COINS、JR 東日本、AEON Mall、BOOKOFF、PARCO、HANDS；LoFt（網友回報）",
+            fee: "扣資料處理費和匯款費，各店自訂，登錄後看得到；網友回報 3COINS 約 ¥300",
+            speed: "看店家，可能出境後超過 1 個月" },
+  gb:     { name: "Global Blue", co: "Global Blue TFS Japan", kobeCash: true,
+            reg: "店家給的 email 或 QR Code，用 App 或網頁；退款方式可之後再補",
+            to: "信用卡等非現金、市區或機場領現金",
+            stores: "阪急・阪神百貨、Yodobashi、京王、西武・SOGO（官方）；高島屋（網友回報）",
+            fee: "沒有統一費率，印在退稅單上；高島屋扣稅額的 23%（約未稅價 2.3%）",
+            speed: "通常 3–5 天", extra: "Yodobashi 梅田、京都等 11 店可在市區先領現金" },
+  pie:    { name: "PIE VAT", co: "Pie Systems Japan", kobeCash: false,
+            reg: "一定要當天在店裡用 App（或網頁）掃 QR、輸入 6 碼完成，離開店就不能補",
+            to: "信用卡、銀行、PayPal、WeChat Pay（依地區）",
+            stores: "三井 Outlet Park、LaLaport、SHIBUYA109、東急 Plaza；Montbell（網友回報）",
+            fee: "未稅價 1.5–3.0% 服務費，再加 0.28–0.32% 提領費",
+            speed: "在 App 按提領後最多 15 個工作天" },
+  ocean:  { name: "Ocean Tax Refund", co: "Ocean", kobeCash: false,
+            reg: "網頁、LINE 或微信",
+            to: "依退款方式",
+            stores: "山田電機、Animate（官方）",
+            fee: "購買金額 1.55%，再加依退款方式的處理費",
+            speed: "未公布" }
+};
+/* 依店名推測業者（網路整理，以收據為準） */
+var TAX_GUESS = [
+  [/無印|muji/i, ""],   /* 無印良品沒公開，在百貨裡也不要猜成百貨的業者 */
+  [/ドン・?キホーテ|ドンキ|donki|唐吉訶德|mega ?ドン/i, "jtax"], [/ビック|bic ?camera/i, "jtax"], [/コジマ|kojima/i, "jtax"],
+  [/ソフマップ|sofmap/i, "jtax"], [/マツモトキヨシ|マツキヨ|松本清/i, "jtax"], [/ココカラ|cocokara/i, "jtax"],
+  [/ユニクロ|uniqlo/i, "jtax"], [/(^|[\s　])GU([\s　]|$)|ジーユー/i, "jtax"],
+  [/3 ?coins|スリーコインズ/i, "jpref"], [/イオン|aeon/i, "jpref"], [/ブックオフ|book ?off/i, "jpref"], [/パルコ|parco/i, "jpref"],
+  [/ハンズ|hands/i, "jpref"], [/ロフト|loft/i, "jpref"],
+  [/阪急|阪神|ヨドバシ|yodobashi|京王|西武|そごう|sogo|高島屋/i, "gb"],
+  [/モンベル|mont-?bell|三井アウトレット|ららぽーと|lalaport|shibuya ?109|渋谷109|東急プラザ/i, "pie"],
+  [/ヤマダ|labi|山田電機|アニメイト|animate/i, "ocean"]
+];
+function guessTaxOp(name) {
+  for (var i = 0; i < TAX_GUESS.length; i++) if (TAX_GUESS[i][0].test(name || "")) return TAX_GUESS[i][1];
+  return "";
+}
+/* Cash Japan 標準服務費：退款額的 10%（估算，實際可能有每筆最低／最高、以 ¥50 為單位） */
+function cashFee(refund) { return Math.round(refund * 0.1); }

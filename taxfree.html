@@ -71,6 +71,11 @@ label.btn { cursor: pointer; }
 .viewer .btn { justify-self: end; }
 
 .storegrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.opcard .rtop { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.opcard h4, .mcard h4 { margin: 0; }
+.mcard.rec { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-soft); }
+.mcard ul { margin: 6px 0 0; padding-left: 1.2em; font-size: 14px; display: grid; gap: 3px; }
+.sub-intro { margin: 0 0 10px; font-size: 15px; }
 .traps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 15px; }
 .phrases { display: grid; gap: 8px; }
 .phrases .phrase { margin-top: 0; }
@@ -98,7 +103,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     <h2 class="sec-title" id="how-h">怎麼運作</h2>
     <ol class="steps">
       <li><div><h3>結帳：出示護照、付含稅價</h3><p>同一家店、同一天，<strong>未稅滿 ¥5,000</strong> 才能退稅。要在日本吃或用的東西，請店員<strong>分開結帳</strong>。</p></div></li>
-      <li><div><h3>登錄退款方式</h3><p>掃收據上的 QR Code，或照店員說明登錄信用卡、Alipay、WeChat Pay 或機場領現金。每家店用的退稅業者不同，<strong>結帳時就問清楚</strong>。</p></div></li>
+      <li><div><h3>登錄退款方式</h3><p>掃收據上的 QR Code，或照店員說明登錄信用卡、Alipay、WeChat Pay 或機場領現金。每家店用的退稅業者不同，<strong>結帳時就問清楚</strong>（<a href="#op-h">看各家業者</a>）。</p></div></li>
       <li><div><h3>12/2 神戶機場：託運前先給海關確認</h3><p>T2 一樓，<strong>報到託運之前</strong>帶著所有免稅品到海關端末刷護照。綠燈就完成；紅燈要把商品拿給海關看。</p></div></li>
       <li><div><h3>收到退款</h3><p>刷卡或電子錢包之後才入帳；選現金的人，過出境審查後到退款機台刷護照領。</p></div></li>
     </ol>
@@ -130,10 +135,23 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
           </div>
           <span class="hint">照片會跟這筆收據存在手機裡。拍到 QR Code 會自動讀出退款登錄連結，之後按一下就能去登錄。金額還是要自己填。</span>
         </div>
-        <div class="field full">
+        <div class="field">
           <label for="f-store">店名</label>
           <input id="f-store" list="store-list" autocomplete="off" placeholder="例：ドン・キホーテ 三宮店" required>
           <datalist id="store-list"></datalist>
+        </div>
+        <div class="field">
+          <label for="f-op">退稅業者</label>
+          <select id="f-op">
+            <option value="unknown">不知道（看收據或問店員）</option>
+            <option value="jtax">J-TaxRefund</option>
+            <option value="jpref">JPrefund</option>
+            <option value="gb">Global Blue</option>
+            <option value="pie">PIE VAT</option>
+            <option value="ocean">Ocean Tax Refund</option>
+            <option value="other">其他</option>
+          </select>
+          <span class="hint" id="f-op-hint">打店名會依網路整理自動帶入，以收據為準</span>
         </div>
         <div class="field">
           <label for="f-date">購買日期</label>
@@ -206,43 +224,67 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       <div class="phrase"><p>我要退稅</p><p class="jp" lang="ja">免税でお願いします。</p></div>
       <div class="phrase"><p>在日本要用的東西，收據分開</p><p class="jp" lang="ja">日本で使う物は、レシートを分けてください。</p></div>
       <div class="phrase"><p>退款方式要怎麼登錄？</p><p class="jp" lang="ja">返金方法はどうやって登録しますか？</p></div>
+      <div class="phrase"><p>退稅是哪一家業者處理？</p><p class="jp" lang="ja">免税の返金はどちらの会社ですか？</p></div>
       <div class="phrase"><p>可以退到信用卡嗎？</p><p class="jp" lang="ja">クレジットカードに返金できますか？</p></div>
     </div>
   </section>
 
-  <section aria-labelledby="st-h">
-    <h2 class="sec-title" id="st-h">各店退款方式</h2>
-    <div class="storegrid">
-      <article class="scard">
-        <h4>唐吉訶德（含 MEGA ドンキ）</h4>
-        <div class="rmeta">
-          <div><span class="k">業者</span>J&amp;J Tax Free「J-TaxRefund」</div>
-          <div><span class="k">登錄</span>掃收據 QR Code，購買日起 180 天內</div>
-          <div><span class="k">方式</span>信用卡、Alipay、WeChat Pay、機場現金</div>
-          <div><span class="k">手續費</span>申請免費；選機場領現金要另付業者手續費</div>
-        </div>
-      </article>
-      <article class="scard">
-        <h4>BicCamera</h4>
-        <div class="rmeta">
-          <div><span class="k">手續費</span>申請退款免費</div>
-          <div><span class="k">其他</span>登錄方式結帳時問店員</div>
-        </div>
-      </article>
-      <article class="scard">
-        <h4>UNIQLO、GU、無印良品、LoFt、神戸阪急</h4>
-        <div class="rmeta">
-          <div><span class="k">現況</span>還沒找到整理好的官方說明</div>
-          <div><span class="k">做法</span>結帳前先說「免税でお願いします」，問清楚登錄方式和手續費，收據拍照留底</div>
-        </div>
-      </article>
+  <section aria-labelledby="op-h">
+    <h2 class="sec-title" id="op-h">退稅業者</h2>
+    <p class="sub-intro">新制的退款不是政府退，是店家交給業者處理。收據或店家螢幕上的 QR Code 會帶你到該業者的網站或 App，<strong>同一家業者只要註冊一次</strong>。註冊時要拍護照，綁卡常要收簡訊驗證碼：用日本 eSIM 的話，台灣門號記得開漫遊或用 Wi‑Fi 通話。</p>
+    <div class="storegrid" id="opgrid">
       <article class="scard">
         <h4>神戶機場領現金（Cash Japan）</h4>
         <div class="rmeta">
-          <div><span class="k">位置</span>T2 一樓，過出境審查後</div>
-          <div><span class="k">適用</span>只限 Global Blue、J&amp;J Tax Free、JPrefund 這三家業者的店</div>
-          <div><span class="k">上限</span>機台一次最多退 ¥100,000</div>
+          <div><span class="k">位置</span>T2 一樓，只有自助機台，24 小時；過出境審查後領</div>
+          <div><span class="k">適用</span>官網只列 Global Blue、J&amp;J Tax Free（J-TaxRefund）、JPrefund</div>
+          <div><span class="k">手續費</span>標準是退款額的 10%（每筆可能有最低、最高金額）</div>
+          <div><span class="k">上限</span>機台一次最多 ¥100,000</div>
         </div>
+        <p class="rnote">J-TaxRefund 要先在帳號裡把退款方式設成現金，機台才領得到。</p>
+      </article>
+      <article class="scard">
+        <h4>UNIQLO、GU、無印良品、LoFt、SunDrug、KoKuMiN</h4>
+        <div class="rmeta">
+          <div><span class="k">現況</span>無印、SunDrug、KoKuMiN 沒公開；UNIQLO、GU、LoFt 只有非官方或網友整理</div>
+          <div><span class="k">做法</span>結帳時用上面的日文問業者，收據拍照記下來</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="m-h">
+    <h2 class="sec-title" id="m-h">退款方式比較</h2>
+    <div class="storegrid">
+      <article class="scard mcard rec">
+        <div class="rtop"><h4>信用卡</h4><span class="pill ok">建議</span></div>
+        <ul>
+          <li>主要業者都能退，機場不用排隊</li>
+          <li>Global Blue 通常 3–5 天；J-TaxRefund 幾週到約 2 個月</li>
+          <li>持卡人英文姓名要跟護照完全一樣</li>
+        </ul>
+      </article>
+      <article class="scard mcard">
+        <div class="rtop"><h4>Alipay・WeChat Pay</h4></div>
+        <ul>
+          <li>J-TaxRefund、JPrefund 有（PIE VAT 依地區）</li>
+          <li>本來就有在用、能收款的帳號才方便</li>
+        </ul>
+      </article>
+      <article class="scard mcard">
+        <div class="rtop"><h4>銀行轉帳</h4></div>
+        <ul>
+          <li>J-TaxRefund 要退款 ¥100,000 以上，以美元匯出</li>
+          <li>JPrefund、PIE VAT 也有；跨國匯款可能另有費用</li>
+        </ul>
+      </article>
+      <article class="scard mcard">
+        <div class="rtop"><h4>機場領現金</h4><span class="pill warn">神戶要看業者</span></div>
+        <ul>
+          <li>當場拿日圓，但 Cash Japan 標準扣退款額 10%</li>
+          <li>神戶只收 Global Blue、J-TaxRefund、JPrefund；PIE VAT、Ocean 不行</li>
+          <li>唐吉訶德官方說：申請免費，領現金另收手續費</li>
+        </ul>
       </article>
     </div>
   </section>
@@ -270,6 +312,9 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       <li><a href="https://www.donki.com/service/tax_free/jp/tax_free.php">ドン・キホーテ：免税手続き</a>・<a href="https://honichi.com/news/2026/11/12/ppih-tax-refund/">J-TaxRefund 採用</a></li>
       <li><a href="https://www.fun-japan.jp/tw/articles/14790">FUN! JAPAN：各店家手續與退款方式</a></li>
       <li><a href="https://grenade.tw/blog/japan-tax-refund-new-system-tutorial/">退稅金額試算與手續費案例</a></li>
+      <li><a href="https://wellstsai.com/single-page-conclusion/japan-tax-refund-2026.html">日本退稅新制 6 個重點：各業者登錄期限、退款方式、手續費、店家對照</a></li>
+      <li><a href="https://www.setn.com/ampnews/1913662">三立：林氏璧整理 4 大退稅系統</a>・<a href="https://blog.104.com.tw/?p=257043">104：各平台操作方式</a></li>
+      <li><a href="https://www.stheadline.com/travel/3628833/">星島：Cash Japan 標準服務費 10%</a>・<a href="https://www.centrair.jp/en/service/1347407_2135.html">中部機場：Cash Japan 適用業者</a></li>
     </ul>
   </section>
 
@@ -284,6 +329,10 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
   var KEY = "taxfree.v1";
   var JSQR_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
   var METHODS = { none: "還沒登錄", card: "信用卡", alipay: "Alipay", wechat: "WeChat Pay", cash: "機場領現金", bank: "銀行轉帳" };
+  var OPS = { unknown: "不知道" };
+  Object.keys(TAX_OPS).forEach(function (k) { OPS[k] = TAX_OPS[k].name; });
+  OPS.other = "其他";
+  function opOf(it) { return it.op || guessTaxOp(it.store) || "unknown"; }
 
   var state = load();
   var pending = { photo: null, qr: "" };   /* 表單上剛拍的照片 */
@@ -425,19 +474,34 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       issues.push({ cls: "warn", txt: isUrl(it.qr) ? "還沒登錄退款方式：按上面的登錄連結" : "還沒登錄退款方式" });
       if (level === "ok") level = "warn";
     }
+    var op = opOf(it), eligible = it.intact && groups[k] >= 5000, fee = 0;
+    if (it.method === "none" && op === "pie") issues[issues.length - 1].txt += "（PIE VAT 要當天在店裡用 App 辦）";
+    if (it.method === "cash") {
+      if (TAX_OPS[op] && !TAX_OPS[op].kobeCash) {
+        issues.push({ cls: "warn", txt: TAX_OPS[op].name + " 在神戶機場不能領現金，請改退到卡" });
+        if (level === "ok") level = "warn";
+      } else if (!TAX_OPS[op]) {
+        issues.push({ cls: "warn", txt: "先確認業者：神戶只有 Global Blue、J-TaxRefund、JPrefund 能領現金" });
+        if (level === "ok") level = "warn";
+      } else if (eligible) {
+        fee = cashFee(c.tax);
+        issues.push({ cls: "info", txt: "領現金約扣 " + yen(fee) + "（10%）" + (op === "jtax" ? "，帳號要先設成現金" : "") });
+      }
+    }
     if (!issues.length) issues.push({ cls: "ok", txt: "沒問題，12/2 帶去海關確認" });
-    return { c: c, issues: issues, level: level, eligible: it.intact && groups[k] >= 5000 };
+    return { c: c, issues: issues, level: level, eligible: eligible, fee: fee, op: op };
   }
 
   /* ---------- 畫面 ---------- */
   function render() {
     var groups = groupTotals();
-    var refund = 0, paid = 0, issueCount = 0;
+    var refund = 0, paid = 0, issueCount = 0, fees = 0;
     var list = state.items.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : b.created - a.created; });
     var html = list.map(function (it) {
       var a = assess(it, groups);
       paid += a.c.paid;
       if (a.eligible) refund += a.c.tax;
+      fees += a.fee;
       if (a.level !== "ok") issueCount++;
       var qrHtml = "";
       if (isUrl(it.qr)) qrHtml = '<a class="qrlink" href="' + esc(it.qr) + '">打開退款登錄網站 ↗</a>';
@@ -446,7 +510,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
         '<div class="rbody"><div>' +
           '<h4 lang="ja">' + esc(it.store) + '</h4>' +
           '<div class="rline"><span>' + md(it.date) + '</span><span>含稅 <b>' + yen(a.c.paid) + '</b></span><span>未稅 <b>' + yen(a.c.ex) + '</b></span><span>可退約 <b>' + yen(a.eligible ? a.c.tax : 0) + '</b></span></div>' +
-          '<div class="rline"><span>退款方式：' + METHODS[it.method] + '</span><span>出境期限 ' + addDays(it.date, 90) + '</span></div>' +
+          '<div class="rline"><span>業者：' + OPS[a.op] + (it.op || a.op === "unknown" ? "" : "（推測）") + '</span><span>退款方式：' + METHODS[it.method] + '</span><span>出境期限 ' + addDays(it.date, 90) + '</span></div>' +
           (it.note ? '<div class="rline"><span>' + esc(it.note) + '</span></div>' : "") +
           (qrHtml ? '<div class="rline">' + qrHtml + '</div>' : "") +
         '</div>' +
@@ -454,7 +518,9 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
         '</div>' +
         '<div class="pills">' + a.issues.map(function (x) { return '<span class="pill ' + x.cls + '">' + x.txt + '</span>'; }).join("") + '</div>' +
         '<div class="rline">' +
-          (it.method === "none" ? '<label class="check" style="font-size:13px"><span>登錄好了：</span><select data-method="' + it.id + '" aria-label="退款方式">' +
+          (a.op === "unknown" || a.op === "other" ? '<label class="check" style="font-size:13px"><span>業者：</span><select data-op="' + it.id + '" aria-label="退稅業者">' +
+            Object.keys(OPS).map(function (m) { return '<option value="' + m + '"' + (m === a.op ? " selected" : "") + '>' + OPS[m] + '</option>'; }).join("") + '</select></label>' : "") +
+          (it.method === "none" || (it.method === "cash" && !(TAX_OPS[a.op] && TAX_OPS[a.op].kobeCash)) ? '<label class="check" style="font-size:13px"><span>' + (it.method === "none" ? "登錄好了：" : "改成：") + '</span><select data-method="' + it.id + '" aria-label="退款方式">' +
             Object.keys(METHODS).map(function (m) { return '<option value="' + m + '"' + (m === it.method ? " selected" : "") + '>' + METHODS[m] + '</option>'; }).join("") + '</select></label>' : "") +
           '<button class="linkbtn" type="button" data-addphoto="' + it.id + '">' + (it.photo ? "重拍收據" : "補拍收據") + '</button>' +
           '<button class="linkbtn" type="button" data-del="' + it.id + '">刪除</button>' +
@@ -466,11 +532,32 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       getPhoto(im.dataset.photo).then(function (u) { if (u) im.src = u; else im.alt = "照片不在這個瀏覽器裡"; });
     });
     document.getElementById("t-refund").textContent = yen(refund);
-    document.getElementById("t-twd").textContent = twd(refund) || " ";
+    var sub = [];
+    if (fees) sub.push("扣領現金手續費後約 " + yen(refund - fees));
+    if (twd(refund - fees)) sub.push(twd(refund - fees));
+    document.getElementById("t-twd").textContent = sub.join("・") || " ";
     document.getElementById("t-count").textContent = state.items.length + " 張";
     document.getElementById("t-paid").textContent = "含稅共 " + yen(paid);
     document.getElementById("t-issues").textContent = issueCount + " 張";
     document.getElementById("t-issue-tile").className = "tile" + (issueCount ? " bad" : " good");
+  }
+
+  function renderOps() {
+    document.getElementById("opgrid").insertAdjacentHTML("afterbegin", Object.keys(TAX_OPS).map(function (k) {
+      var o = TAX_OPS[k];
+      return '<article class="scard opcard">' +
+        '<div class="rtop"><h4>' + esc(o.name) + '</h4><span class="pill ' + (o.kobeCash ? "ok" : "warn") + '">' + (o.kobeCash ? "神戶機場可領現金" : "神戶機場不能領現金") + '</span></div>' +
+        '<div class="rmeta">' +
+          '<div><span class="k">公司</span>' + esc(o.co) + '</div>' +
+          '<div><span class="k">店家</span>' + esc(o.stores) + '</div>' +
+          '<div><span class="k">登錄</span>' + esc(o.reg) + '</div>' +
+          '<div><span class="k">退到</span>' + esc(o.to) + '</div>' +
+          '<div><span class="k">手續費</span>' + esc(o.fee) + '</div>' +
+          '<div><span class="k">入帳</span>' + esc(o.speed) + '</div>' +
+        '</div>' +
+        (o.extra ? '<p class="rnote">' + esc(o.extra) + '</p>' : "") +
+      '</article>';
+    }).join(""));
   }
 
   function preview() {
@@ -513,6 +600,17 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     document.getElementById("f-date").value = defaultDate();
     document.getElementById("f-rate").value = state.rate;
 
+    var opTouched = false;
+    function autoOp() {
+      if (opTouched) return;
+      var g = guessTaxOp(document.getElementById("f-store").value);
+      document.getElementById("f-op").value = g || "unknown";
+      document.getElementById("f-op-hint").textContent = g ? "依網路整理推測是 " + TAX_OPS[g].name + "，以收據為準" : "打店名會依網路整理自動帶入，以收據為準";
+    }
+    document.getElementById("f-store").addEventListener("input", autoOp);
+    document.getElementById("f-op").addEventListener("change", function () {
+      opTouched = true; document.getElementById("f-op-hint").textContent = "已手動選擇";
+    });
     document.getElementById("f-t10").addEventListener("input", preview);
     document.getElementById("f-t8").addEventListener("input", preview);
     document.getElementById("f-cam").addEventListener("change", onFormPhoto);
@@ -533,6 +631,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       var item = {
         id: id, created: Date.now(), store: store, date: date, t10: t10, t8: t8,
         method: document.getElementById("f-method").value,
+        op: document.getElementById("f-op").value,
         intact: document.getElementById("f-intact").checked,
         note: document.getElementById("f-note").value.trim(),
         qr: pending.qr || "", photo: !!pending.photo
@@ -543,6 +642,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       save(); render();
       ["f-t10", "f-t8", "f-note"].forEach(function (x) { document.getElementById(x).value = ""; });
       document.getElementById("f-intact").checked = true;
+      opTouched = false;
       pending = { photo: null, qr: "" }; showPending(); preview();
       document.getElementById("tool-msg").textContent = "已加入 " + store;
     });
@@ -587,9 +687,10 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeViewer(); });
 
     document.getElementById("receipts").addEventListener("change", function (e) {
-      var s = e.target.closest("select[data-method]");
-      if (!s) return;
-      state.items.forEach(function (it) { if (it.id === s.dataset.method) it.method = s.value; });
+      var s = e.target.closest("select[data-method]"), o = e.target.closest("select[data-op]");
+      if (s) state.items.forEach(function (it) { if (it.id === s.dataset.method) it.method = s.value; });
+      else if (o) state.items.forEach(function (it) { if (it.id === o.dataset.op) it.op = o.value; });
+      else return;
       save(); render();
     });
 
@@ -600,7 +701,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       var lines = ["神戶京阪行程・免稅收據（" + state.items.length + " 張）"];
       state.items.forEach(function (it) {
         var a = assess(it, groups);
-        lines.push(it.date + " " + it.store + "｜含稅 " + yen(a.c.paid) + "｜可退約 " + yen(a.eligible ? a.c.tax : 0) + "｜" + METHODS[it.method] +
+        lines.push(it.date + " " + it.store + "｜含稅 " + yen(a.c.paid) + "｜可退約 " + yen(a.eligible ? a.c.tax : 0) + "｜" + OPS[a.op] + "｜" + METHODS[it.method] +
           (it.note ? "｜" + it.note : "") + (it.qr ? "｜登錄連結 " + it.qr : ""));
       });
       lines.push("預計可退合計：" + document.getElementById("t-refund").textContent);
@@ -618,6 +719,7 @@ textarea#export { width: 100%; min-height: 160px; font: 13px/1.5 var(--f-mono); 
       document.getElementById("tool-msg").textContent = "已清除";
     });
 
+    renderOps();
     render();
   }
 

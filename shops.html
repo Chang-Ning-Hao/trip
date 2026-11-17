@@ -33,9 +33,10 @@
     <ul>
       <li>2026/11/1 起改成「先付含稅價、出境再退稅」：在免稅店結帳時先付含消費稅的價格，出境時在機場的免稅手續機台出示護照、經海關確認東西帶出境後，才把消費稅退給你。</li>
       <li>要在購買日起 90 天內出境時辦理。12/2 從神戶機場出境時，記得預留時間給這個手續。</li>
+      <li>每家店交給不同的退稅業者處理，登錄方式、手續費、能不能在神戶機場領現金都不一樣。下面有寫的是網路整理，<strong>以收據上的 QR Code 為準</strong>。</li>
       <li>零食、化妝品這類消耗品如果在日本就用掉或吃掉，出境時沒辦法退稅；以前那種密封的免稅袋取消了。</li>
     </ul>
-    <p style="margin:10px 0 0"><a class="btn small" href="taxfree.html">退稅記帳工具（可拍收據、掃 QR Code）→</a></p>
+    <p style="margin:10px 0 0"><a class="btn small" href="taxfree.html">退稅記帳工具（可拍收據、掃 QR Code）→</a> <a class="btn small" href="taxfree.html#op-h">各家退稅業者怎麼退 →</a></p>
   </section>
 
   <section aria-labelledby="list-h" style="margin-top:24px">
@@ -107,6 +108,7 @@
             '<div class="rmeta">' +
               '<div><span class="k">位置</span>' + esc(s.where) + '</div>' +
               '<div><span class="k">營業</span>' + esc(s.hours) + '</div>' +
+              (s.tax ? '<div><span class="k">退稅</span>' + esc(s.tax) + '</div>' : "") +
             '</div>' +
             (s.tip ? '<p class="rnote">' + esc(s.tip) + '</p>' : "") +
             '<div class="rlinks"><a href="' + mapUrl(s.name) + '">Google 地圖導航 ↗</a>' + (s.ll ? '<a href="map.html#shops">在地圖上看</a>' : "") + '</div>' +
