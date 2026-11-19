@@ -159,23 +159,43 @@
       eat: "豚まん一個 ¥120，三個起點", budget: "¥1,000 內", hours: "10:00–18:30（賣完為止）", closed: [1], closedTxt: "週一",
       note: "南京町最長的排隊名物。本店改建中、先在臨時店面營業，預計 2026 年 11 月前後完工，去之前查一下現在在哪個店面。",
       addr: "兵庫県神戸市中央区元町通2-1-14", ll: [34.6882, 135.1879], days: ["d1", "d5"] },
+    { id: "tottsan", sea: true, name: "とっつぁん 三宮店", area: "三宮・JR 東口往北約 5 分（離飯店近）", genre: "海鮮居酒屋",
+      eat: "7 種生魚片拼盤約 ¥1,780、天婦羅一個 ¥100 起、料多的とっつぁん丼", budget: "¥2,000–3,999",
+      hours: "17:30–23:00（週日・假日 17:00 起）", closed: [1], closedTxt: "週一（食べログ寫 15:00 起、無休，以現場為準）",
+      note: "漁港風的熱鬧大眾海鮮酒場，開門前常有人排。關東煮裡有牛筋，點的時候避開。地圖位置是估的，用 Google 地圖導航比較準。",
+      ll: [34.6966, 135.1963], days: ["d1", "d5"], tabelog: "https://tabelog.com/hyogo/A2801/A280101/28043239/" },
+    { id: "tosashimizu", sea: true, name: "土佐清水ワールド 三宮本店", area: "旭通（飯店同一區）", genre: "高知鄉土料理・鰹魚稻草燒",
+      eat: "現場用稻草大火燒的鰹魚たたき（小份 5 片 ¥1,188）、長太郎貝濱燒", budget: "午餐約 ¥1,500・晚餐約 ¥4,000",
+      hours: "11:30–23:00", closed: [], closedTxt: "無休",
+      note: "高知縣土佐清水市的直營店，JR 三ノ宮站走 3 分。時間是 ぐるなび 的資料，同系列其他分店平日 16:30 才開，出發前確認。",
+      addr: "兵庫県神戸市中央区旭通5-322", ll: [34.6960, 135.1982], days: ["d1", "d5"] },
 
-    { id: "yamayoshi", name: "炭焼あなご やま義", area: "姬路站前", genre: "星鰻（穴子）料理",
+    { id: "yamayoshi", sea: true, name: "炭焼あなご やま義", area: "姬路站前", genre: "星鰻（穴子）料理",
       eat: "あなごめし、蒸・燒・佃煮三吃定食", budget: "白燒單點 ¥1,600、便當 ¥2,500", hours: "11:00–20:00（L.O. 19:30）", closed: [], closedTxt: "無休",
       note: "JR 姬路站北口、お溝筋商店街一進去。週末開店前就排隊，11:00 前到或下午 2 點後再來。",
       addr: "兵庫県姫路市駅前町301", ll: [34.8283, 134.6899], days: ["d2"] },
-    { id: "totoro", name: "立ち喰い寿司 魚路", area: "姬路站高架下", genre: "立食壽司",
+    { id: "totoro", sea: true, name: "立ち喰い寿司 魚路", area: "姬路站高架下", genre: "立食壽司",
       eat: "招牌一本穴子、特上握壽司套餐 ¥2,090", budget: "¥1,000–3,000", hours: "營業時間出發前確認", closed: [], closedTxt: "未查到", unverified: true,
       note: "在 JR 姬路站直通的ビエラ姫路，一貫 ¥120 起，開店前 30 分～1 小時就開始排。",
       addr: "兵庫県姫路市南駅前町127-1", ll: [34.8262, 134.6906], days: ["d2"] },
-    { id: "takoiso", name: "たこ磯", area: "明石・魚の棚（舞子往西 2 站）", genre: "明石燒（玉子燒）",
+    { id: "takoiso", sea: true, name: "たこ磯", area: "明石・魚の棚（舞子往西 2 站）", genre: "明石燒（玉子燒）",
       eat: "玉子燒 15 個 ¥800、穴子入り ¥950", budget: "¥1,000 內", hours: "10:00–19:00", closed: [], closedTxt: "無休",
       note: "魚の棚商店街裡。JR 舞子到明石約 5 分，去大橋前後順路。",
       addr: "兵庫県明石市本町1丁目1-11", ll: [34.6474, 134.9937], days: ["d2"] },
-    { id: "yokoi", name: "よこ井", area: "明石・魚の棚", genre: "明石燒（玉子燒）",
+    { id: "yokoi", sea: true, name: "よこ井", area: "明石・魚の棚", genre: "明石燒（玉子燒）",
       eat: "明石燒 10 個 ¥500，沾冰涼昆布高湯的老吃法", budget: "¥1,000 內", hours: "10:00–17:00", closed: [4], closedTxt: "週四",
       note: "17:00 就關，要排在看大橋之前。",
       addr: "兵庫県明石市本町1丁目1-13", ll: [34.6476, 134.9941], days: ["d2"] },
+    { id: "mitsuboshi", sea: true, name: "明石 みつぼし", area: "明石・魚の棚北口", genre: "明石章魚・鯛魚・穴子料理",
+      eat: "一人份蒸籠章魚飯（たこせいろ）、たこづくし御膳、みつぼし御膳約 ¥1,850（章魚飯＋生魚片＋穴子天婦羅）", budget: "午餐約 ¥2,000・晚餐約 ¥5,000 內",
+      hours: "11:30–15:00、17:00–21:00（L.O. 20:30）", closed: [0], closedTxt: "週日，另每月一次連休",
+      note: "坐下來好好吃一頓明石章魚的選擇，比站著吃明石燒有飽足感。",
+      addr: "兵庫県明石市本町1-2-4", ll: [34.6480, 134.9931], days: ["d2"] },
+    { id: "tanakaya", sea: true, name: "立ち呑み処 たなか屋", area: "明石・魚の棚", genre: "立飲・生魚片・日本酒", badge: "食べログ 立ち飲み 百名店 2025",
+      eat: "當天的生魚片拼盤配日本酒", budget: "¥3,000–3,999",
+      hours: "週六日・假日 12:00–18:00；週一二五 12:00–14:00、17:00–21:00", closed: [3, 4], closedTxt: "週三、週四",
+      note: "酒屋旁邊的站著喝的小店，不能預約。網友說先到隔壁酒屋登記名字，開門後依序叫號。以喝酒為主，不喝酒的話選みつぼし。",
+      addr: "兵庫県明石市本町1-1-13", ll: [34.6478, 134.9945], days: ["d2"], tabelog: "https://tabelog.com/hyogo/A2804/A280401/28008512/" },
 
     { id: "kogaryu", name: "大阪アメリカ村 甲賀流 本店", area: "美國村・三角公園前", genre: "章魚燒", badge: "米其林指南介紹過",
       eat: "ソースマヨ 10 個約 ¥600，買了在對面三角公園吃", budget: "¥1,000 內", hours: "11:00–20:00", closed: [], closedTxt: "1/1–1/2 休",
@@ -189,6 +209,16 @@
       hours: "12:00–15:00、17:00–22:00", closed: [4], closedTxt: "週四、第 3 個週三",
       note: "逛完電電街走過去約 10 分，晚餐剛好。",
       addr: "大阪府大阪市中央区千日前1-9-19", ll: [34.6662, 135.5047], days: ["d3"] },
+    { id: "sanpei", sea: true, name: "黒門三平 黒門市場店", area: "黑門市場（電電街旁，走 5–10 分）", genre: "鮮魚店內用・海鮮丼",
+      eat: "每天換料的海鮮丼、本鮪魚丼；店裡買的生蠔、海膽也能請店員切好現吃", budget: "約 ¥1,500–3,000",
+      hours: "9:30–17:00", closed: [], closedTxt: "無休",
+      note: "大阪中央市場最大水產批發商旗下的鮮魚店，附設內用區。丼飯賣完就沒了，中午前去比較保險。",
+      addr: "大阪府大阪市中央区日本橋1-22-25", ll: [34.6664, 135.5062], days: ["d3"] },
+    { id: "daikisuisan", sea: true, name: "大起水産回転寿司 道頓堀店", area: "道頓堀", genre: "迴轉壽司",
+      eat: "鮪魚大トロ・かまとろ、穴子、大隻蝦，料切得大塊", budget: "午餐約 ¥1,500・晚餐約 ¥2,500",
+      hours: "11:00–15:00、16:00–21:30（另一說 11:00–23:00 不休息）", closed: [1], closedTxt: "週一（另一說無休）",
+      note: "大阪水產公司直營的迴轉壽司，有英文菜單。道頓堀排隊名店多，這家通常比較好進。",
+      addr: "大阪府大阪市中央区道頓堀1-7-24", ll: [34.6687, 135.5040], days: ["d3"] },
 
     { id: "toyouke", name: "とようけ茶屋", area: "北野天滿宮前（金閣寺南邊約 2 km）", genre: "豆腐・湯葉",
       eat: "生ゆば丼、とようけ丼、奴膳 ¥1,540", budget: "¥1,000–2,000", hours: "11:00–15:00", closed: [4], closedTxt: "週四，另每月 2 次不定休",
@@ -202,10 +232,20 @@
       eat: "京都湯葉飯、抹茶聖代、紅豆湯", budget: "¥2,000 內", hours: "營業時間出發前確認", closed: [], closedTxt: "未查到", unverified: true,
       note: "參拜完休息喝杯熱的。",
       ll: [35.1196, 135.7638], days: ["d4"] },
-    { id: "kaneyo", name: "京極かねよ", area: "河原町（minä perhonen 走路約 10 分）", genre: "鰻魚",
+    { id: "kaneyo", sea: true, name: "京極かねよ", area: "河原町（minä perhonen 走路約 10 分）", genre: "鰻魚",
       eat: "名物きんし丼：鰻魚飯上蓋一整片京風玉子燒", budget: "¥3,000–3,999", hours: "11:30–15:30、17:00–20:30", closed: [3], closedTxt: "週三、週二晚上",
       note: "逛完 minä perhonen 吃晚餐，吃完從京都河原町搭阪急回神戶。",
       addr: "京都府京都市中京区松ヶ枝町456", ll: [35.0069, 135.7682], days: ["d4"] },
+    { id: "izuju", sea: true, name: "いづ重", area: "祇園・八坂神社石段下（河原町走約 10 分）", genre: "京都鯖魚壽司（押壽司）",
+      eat: "さば姿寿司（整條鯖魚押壽司）、豆皮壽司", budget: "¥2,000–2,999",
+      hours: "10:30–17:00（賣完提早關）", closed: [3, 4], closedTxt: "週三、週四（遇假日營業、隔天休）",
+      note: "1912 年創業的京壽司老店，就在八坂神社正對面。不能預約，也可以外帶當晚餐或伴手禮。",
+      addr: "京都府京都市東山区祇園町北側292-1", ll: [35.0036, 135.7775], days: ["d4"], tabelog: "https://tabelog.com/kyoto/A2601/A260301/26002550/" },
+    { id: "musashi", sea: true, name: "寿しのむさし 三条本店", area: "河原町三条", genre: "迴轉壽司", unverified: true,
+      eat: "一盤 ¥146／¥346（未稅，價格可能已調漲），師傅現場握", budget: "¥1,000–2,999",
+      hours: "營業時間出發前確認", closed: [], closedTxt: "未查到",
+      note: "1977 年開業、京都人最熟的平價迴轉壽司，逛完河原町晚餐很方便。",
+      addr: "京都府京都市中京区河原町通三条上る恵比須町440", ll: [35.0092, 135.7697], days: ["d4"], tabelog: "https://tabelog.com/kyoto/A2601/A260202/26003605/" },
 
     { id: "freundlieb", name: "カフェ フロインドリーブ 本店", area: "新神戶（北野與布引之間）", genre: "麵包・咖啡（教堂改建）",
       eat: "三明治、德國麵包、聖誕史多倫", budget: "¥1,000–3,000", hours: "10:00–18:00（咖啡 L.O. 17:30）", closed: [3], closedTxt: "週三",
@@ -214,6 +254,7 @@
   ];
   var FOOD_NOTE = {
     d2: "晚餐回三宮的話，可以參考 11/27 那天列的三宮・元町名店。",
+    d3: "黑門市場就在電電街旁邊，海鮮丼可以排在逛電電街前後。",
     d5: "北野和新神戶在三宮北邊，三宮・元町的店也走得到。"
   };
   var DAY_COLORS = ["#c4382e", "#c26a00", "#2b7549", "#285f93", "#7a4bb0", "#4d5a68"];
@@ -249,16 +290,19 @@
     return '<span class="pill ok">週' + WD[wd] + '有營業</span>';
   }
   function foodHtml(d, id) {
-    var list = FOOD.filter(function (r) { return r.days.indexOf(id) >= 0; });
+    var list = FOOD.filter(function (r) { return r.days.indexOf(id) >= 0; })
+      .map(function (r, i) { return { r: r, i: i }; })
+      .sort(function (a, b) { return ((b.r.sea ? 1 : 0) - (a.r.sea ? 1 : 0)) || (a.i - b.i); })
+      .map(function (x) { return x.r; });
     if (!list.length) return "";
     return '<div class="food">' +
       '<div class="food-head"><h4>附近的食べログ名店</h4><a class="btn small" href="map.html#' + id + '">在地圖上看這天</a></div>' +
-      '<p class="food-sub">已排除以牛肉為主的店，每人預算都在 ¥5,000 內。' + (FOOD_NOTE[id] || "") + '</p>' +
+      '<p class="food-sub">已排除以牛肉為主的店，每人預算都在 ¥5,000 內，海鮮店排在前面。' + (FOOD_NOTE[id] || "") + '</p>' +
       '<div class="rgrid">' + list.map(function (r) {
         return '<article class="rcard">' +
           '<div class="rtop"><h5 lang="ja">' + esc(r.name) + '</h5>' + foodPill(r, d.date) + '</div>' +
           '<div class="rarea">' + esc(r.area) + '</div>' +
-          '<div class="rgenre"><strong>' + esc(r.genre) + '</strong>' + (r.badge ? ' <span class="badge">' + esc(r.badge) + '</span>' : "") + '</div>' +
+          '<div class="rgenre">' + (r.sea ? '<span class="badge sea">海鮮</span> ' : "") + '<strong>' + esc(r.genre) + '</strong>' + (r.badge ? ' <span class="badge">' + esc(r.badge) + '</span>' : "") + '</div>' +
           '<div class="rmeta">' +
             '<div><span class="k">吃什麼</span>' + esc(r.eat) + '</div>' +
             '<div><span class="k">預算</span>' + esc(r.budget) + '</div>' +
