@@ -281,7 +281,8 @@ var SHOP_CATS = {
   muji:   { label: "無印良品",   mk: "無", color: "#7d1d1d" },
   loft:   { label: "LoFt",       mk: "Lo", color: "#9a7b00" },
   gu:     { label: "GU",         mk: "GU", color: "#1f3f8f" },
-  uniqlo: { label: "UNIQLO",     mk: "U",  color: "#c4382e" }
+  uniqlo: { label: "UNIQLO",     mk: "U",  color: "#c4382e" },
+  coins3: { label: "3COINS",     mk: "3",  color: "#2f7480" }
 };
 var SHOPS = [
   { id: "kohyo", cat: "super", name: "KOHYO 三宮店", where: "ミント神戸 B1，和車站直通", hours: "7:00–23:00", open: ["07:00", "23:00"],
@@ -309,7 +310,9 @@ var SHOPS = [
   { id: "gu", tax: "J-TaxRefund（非官方整理）・網友回報手續費約 1%",  cat: "gu", name: "GU 三宮オーパ店", where: "三宮 OPA，阪神神戸三宮站 A6 出口步行約 1 分", hours: "依三宮 OPA（約 11:00–21:00，各店不同）", open: null,
     tip: "營業時間沒查到店家自己的公告，出發前看一下 GU 官網。", ll: [34.6921, 135.1925] },
   { id: "uniqlo", tax: "J-TaxRefund（非官方整理），結帳時再確認", cat: "uniqlo", name: "ユニクロ 神戸三宮店", where: "三宮センター街東口 Style Plaza 1–5F", hours: "營業時間出發前查官網", open: null,
-    tip: "兵庫縣最大的 UNIQLO，有 UTme! 客製 T 恤和神戶聯名商品。", addr: "兵庫県神戸市中央区三宮町1-7-5", ll: [34.6926, 135.1938] }
+    tip: "兵庫縣最大的 UNIQLO，有 UTme! 客製 T 恤和神戶聯名商品。", addr: "兵庫県神戸市中央区三宮町1-7-5", ll: [34.6926, 135.1938] },
+  { id: "3coins", tax: "JPrefund（網路整理），以收據為準", cat: "coins3", name: "3COINS 神戸店", where: "三宮本通商店街（生田ロードとトアロード之間）グレース神戸ビル 1F，旧居留地・大丸前站步行約 2 分", hours: "10:00–20:00", open: ["10:00", "20:00"],
+    tip: "收納、廚房小物、旅行用品多是 ¥300 起。可刷卡、Alipay、WeChat Pay。同店同日未稅滿 ¥5,000 才能退稅，¥300 的東西要買十幾樣。第一天去的 umie NORTH MALL 2F 也有一家 3COINS+plus（網路整理）。", addr: "兵庫県神戸市中央区三宮町2-10-7", ll: [34.6910, 135.1918] }
 ];
 
 /* 共用：距離與營業狀態 */
