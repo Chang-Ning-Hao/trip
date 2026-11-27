@@ -389,7 +389,7 @@ var TAX_OPS = {
   jtax:   { name: "J-TaxRefund", co: "J&J Tax Free（JTB × JCB）", kobeCash: true,
             url: "https://j-taxrefund.com/", go: "前往 J-TaxRefund 登錄", how: "網站，不用 App；有中文",
             reg: "掃收據 QR Code 進網頁登錄，不用 App。購買隔天起 180 天內完成；在日本買過東西才能做護照驗證",
-            to: "信用卡、簽帳卡、Alipay、WeChat Pay、銀行轉帳（¥100,000 以上，美元匯出）、機場現金（要先在帳號選現金）",
+            to: "信用卡、簽帳卡、Alipay、WeChat Pay、銀行轉帳（¥100,000 以上，美元匯出）、機場現金（不用註冊，刷護照）",
             stores: "唐吉訶德（官方）；BicCamera、Kojima、Sofmap、松本清、Cocokara、UNIQLO、GU（媒體或網友整理）",
             fee: "官方沒公布費率；唐吉訶德官方說免手續費；網友回報松本清 0.33%、GU 約 1%",
             speed: "幾週到約 2 個月" },
